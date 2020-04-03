@@ -1,11 +1,7 @@
-<!-- Source: https://github.com/MattIPv4/template/blob/master/README.md -->
-
-<!-- Title -->
 <h1 align="center" id="statcordpy">
     statcord.py
 </h1>
 
-<!-- Tag line --> 
 <h3 align="center">A simple API wrapper for statcord.com  to connect your bot and get your bot stats.</h3>
 
 
@@ -61,7 +57,6 @@ When you are ready, simply create a pull request for your contribution and we wi
 You can also help me and the project out by sponsoring me through a [donation on PayPal](http://paypal.me/deltafloof).
 
 
-<!-- Discussion & Support -->
 ## Discussion, Support and Issues
 
 Need support with this project, have found an issue or want to chat with others about contributing to the project?

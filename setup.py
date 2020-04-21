@@ -18,7 +18,7 @@ with open("README.md", "r") as f:
 setup(
     name=__title__,
     author=__author__,
-    url="https://github.com/statcord/statcord.py/",
+    url="https://github.com/labdiscord/statcord.py/",
     version=__version__,
     packages=['statcord'],
     python_requires=">= 3.5",

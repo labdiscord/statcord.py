@@ -24,11 +24,14 @@ class Client:
         status = resp.status
         response = await resp.text()
 
-        json = await resp.json()
+        try:
+            json = await resp.json()
+        except:
+            json = {}
 
         # Error
         if status != 200:
-            raise RequestFailure(status, response)
+            print(response)
 
         return json
 

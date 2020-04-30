@@ -10,7 +10,12 @@ class Client:
         self.bot = bot
         self.key = key
         self.session = None
-        self.base = "https://statcord.com/apollo/"
+        self.base = "https://statcord.com/mason/"
+        self.ratelimited = False
+
+        self.active=[]
+        self.commands=0
+        self.popular=[]
 
     def __session_init(self):
         if self.session is None:
@@ -32,6 +37,11 @@ class Client:
         # Error
         if status != 200:
             print(response)
+            self.ratelimited = True
+        elif self.ratelimited:
+            print(response)
+            self.ratelimited = False
+
 
         return json
 
@@ -54,14 +64,42 @@ class Client:
         key = self.key
         servers = str(self.servers)
         users = str(self.users)
-        data = {"id":bot_id,"key":key,"servers":servers,"users":users}
+        data = {"id":bot_id,"key":key,"servers":servers,"users":users,"commands":str(self.commands),"active":str(len(self.active)),"popular":self.popular}
+        self.active=[]
+        self.commands=0
+        self.popular=[]
+
         self.__session_init()
-        async with self.session.post(url=self.base + "post/stats", json=data, headers=self.__headers()) as resp:
-            return await self.__handle_response(resp)
+        async with self.session.post(url=self.base + "stats", json=data, headers=self.__headers()) as resp:
+            try:
+                return await self.__handle_response(resp)
+            except:
+                pass
 
 
     def start_loop(self):
         self.bot.loop.create_task(self.__loop())
+
+    def command_run(self,ctx):
+        self.commands+=1
+        if (ctx.author.id not in self.active):
+            self.active.append(ctx.author.id)
+
+        command=str(ctx.command)
+        command=command.split(" ")
+        command=command[0]
+        found = False
+        for j in range(len(self.popular)):
+            if self.popular[j]["name"] == command:
+                found = True
+                fd=j
+                
+        if not found:
+            self.popular.append({"name":command,"count":"1"})
+        else:
+            self.popular[fd]["count"]=str(int(self.popular[fd]["count"])+1)
+
+        
 
     async def __loop(self):
         """
@@ -70,4 +108,4 @@ class Client:
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
             await self.post_data()
-            await asyncio.sleep(1800)
+            await asyncio.sleep(3600)

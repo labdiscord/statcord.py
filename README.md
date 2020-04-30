@@ -23,11 +23,12 @@ python3 -m pip install statcord.py
 
 ## Features
 
-* AUTOMATIC server & user count updating.
+* AUTOMATIC server & user counts updating.
+* AUTOMATIC commands & active users updating.
 
 ## Example Discord.py Cogs
 
-### Posting Server & User Count
+### Posting Server & User Counts, Active Users and Popular Commands.
 
 ```Python
 from discord.ext import commands

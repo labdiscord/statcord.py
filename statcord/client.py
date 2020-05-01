@@ -1,6 +1,6 @@
 import asyncio
-from discord import User
 import aiohttp
+from discord import User
 from .exceptions import *
 
 
@@ -13,9 +13,9 @@ class Client:
         self.base = "https://statcord.com/mason/"
         self.ratelimited = False
 
-        self.active=[]
-        self.commands=0
-        self.popular=[]
+        self.active = []
+        self.commands = 0
+        self.popular = []
 
     def __session_init(self):
         if self.session is None:
@@ -29,10 +29,7 @@ class Client:
         status = resp.status
         response = await resp.text()
 
-        try:
-            json = await resp.json()
-        except:
-            json = {}
+        json = await resp.json() or {}
 
         # Error
         if status != 200:
@@ -56,8 +53,7 @@ class Client:
 
     @property
     def users(self):
-        count = len(self.bot.users)
-        return count
+        return len(self.bot.users)
 
     async def post_data(self):
         bot_id = str(self.bot.user.id)
@@ -65,9 +61,9 @@ class Client:
         servers = str(self.servers)
         users = str(self.users)
         data = {"id":bot_id,"key":key,"servers":servers,"users":users,"commands":str(self.commands),"active":str(len(self.active)),"popular":self.popular}
-        self.active=[]
-        self.commands=0
-        self.popular=[]
+        self.active = []
+        self.commands = 0
+        self.popular = []
 
         self.__session_init()
         async with self.session.post(url=self.base + "stats", json=data, headers=self.__headers()) as resp:
@@ -81,23 +77,23 @@ class Client:
         self.bot.loop.create_task(self.__loop())
 
     def command_run(self,ctx):
-        self.commands+=1
+        self.commands += 1
         if (ctx.author.id not in self.active):
             self.active.append(ctx.author.id)
 
-        command=str(ctx.command)
-        command=command.split(" ")
-        command=command[0]
+        command = str(ctx.command)
+        command = command.split(" ")
+        command = command[0]
         found = False
-        for j in range(len(self.popular)):
-            if self.popular[j]["name"] == command:
+        for j in self.popular:
+            if j["name"] == command:
                 found = True
                 fd=j
                 
         if not found:
             self.popular.append({"name":command,"count":"1"})
         else:
-            self.popular[fd]["count"]=str(int(self.popular[fd]["count"])+1)
+            self.popular[fd]["count"] = str(int(self.popular[fd]["count"])+1)
 
         
 

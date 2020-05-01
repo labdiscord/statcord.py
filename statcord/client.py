@@ -85,7 +85,7 @@ class Client:
         command = command.split(" ")
         command = command[0]
         found = False
-        for j in len(range(self.popular)):
+        for j in range(len(self.popular)):
             if self.popular[j]["name"] == command:
                 found = True
                 fd=j

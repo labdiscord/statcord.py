@@ -29,10 +29,7 @@ class Client:
         status = resp.status
         response = await resp.text()
 
-        try:
-            json = await resp.json()
-        except:
-            json = {}
+        json = await resp.json() or {}
 
         # Error
         if status != 200:

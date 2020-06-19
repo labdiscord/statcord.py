@@ -68,7 +68,7 @@ api.start_loop()
 
 @bot.event
 async def on_command(self,ctx):
-    self.api.command_run(ctx)
+    api.command_run(ctx)
 
 
 bot.run(TOKEN)

@@ -102,6 +102,7 @@ class Client:
         The internal loop used for automatically posting server/guild count stats
         """
         await self.bot.wait_until_ready()
+        print("Statcord Auto Post has started!")
         while not self.bot.is_closed():
             await self.post_data()
             await asyncio.sleep(3600)

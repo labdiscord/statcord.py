@@ -62,7 +62,7 @@ import statcord
 
 bot = commands.Bot(command_prefix='!')
 
-key = "statcord.com-2haNft2pcjh4T22kp0co"
+key = "statcord.com-ADDYOURKEYHERE"
 api = statcord.Client(bot,key)
 api.start_loop()
 

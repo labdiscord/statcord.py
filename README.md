@@ -67,7 +67,7 @@ api = statcord.Client(bot,key)
 api.start_loop()
 
 @bot.event
-async def on_command(self,ctx):
+async def on_command(ctx):
     api.command_run(ctx)
 
 

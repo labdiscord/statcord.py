@@ -26,9 +26,9 @@ python3 -m pip install statcord.py
 * AUTOMATIC server & user counts updating.
 * AUTOMATIC commands & active users updating.
 
-## Example Discord.py Cogs
+## Posting Server & User Counts, Active Users and Popular Commands.
 
-### Posting Server & User Counts, Active Users and Popular Commands.
+### Example Cogs System
 
 ```Python
 from discord.ext import commands
@@ -52,6 +52,26 @@ class StatcordPost(commands.Cog):
 def setup(bot):
     bot.add_cog(StatcordPost(bot))
 
+```
+
+### Example non-cogs system.
+```Python
+import discord
+from discord.ext import commands
+import statcord 
+
+bot = commands.Bot(command_prefix='!')
+
+key = "statcord.com-2haNft2pcjh4T22kp0co"
+api = statcord.Client(bot,key)
+api.start_loop()
+
+@bot.event
+async def on_command(self,ctx):
+    self.api.command_run(ctx)
+
+
+bot.run(TOKEN)
 ```
 
 ## Contributing

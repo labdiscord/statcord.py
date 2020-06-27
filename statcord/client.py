@@ -105,4 +105,4 @@ class Client:
         print("Statcord Auto Post has started!")
         while not self.bot.is_closed():
             await self.post_data()
-            await asyncio.sleep(3600)
+            await asyncio.sleep(60)

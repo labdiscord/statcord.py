@@ -116,10 +116,10 @@ class Client:
             cputemp = "-1"
 
         if self.custom1:
-            custom1 = self.custom1()
+            custom1 = await self.custom1()
         
         if self.custom2:
-            custom2 = self.custom2()
+            custom2 = await self.custom2()
 
         data = {"id":bot_id,"key":key,"servers":servers,"users":users,"commands":str(self.commands),"active":self.active,"popular":self.popular,"memactive":memactive,"memload":memload,"cpuload":cpuload,"cputemp":cputemp,"custom1":custom1,"custom2":custom2}
         print(data)

@@ -1,1 +1,4 @@
 aiohttp
+discord.py
+psutil
+asyncio

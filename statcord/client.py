@@ -1,21 +1,59 @@
 import asyncio
 import aiohttp
 from discord import User
-from .exceptions import *
-
+import psutil
 
 class Client:
 
-    def __init__(self, bot, key):
+    def __init__(self, bot, key, **data):
         self.bot = bot
         self.key = key
         self.session = None
-        self.base = "https://statcord.com/mason/"
+        self.base = "https://beta.statcord.com/logan/"
         self.ratelimited = False
+
+        self.mem = True
+        self.cpu = True
+
+        self.custom1 = None
+        self.custom2 = None
+
+        try:
+            if (isinstance(data["mem"],bool)):
+                self.mem = data["mem"]
+            else:
+                print("Memory config must be a Boolean.")
+        except:
+            self.mem = True
+
+        try:
+            if (isinstance(data["cpu"],bool)):
+                self.cpu = data["cpu"]
+            else:
+                print("CPU config must be a Boolean.")
+        except:
+            self.cpu = True
+
+        try:
+            self.custom1 = data["custom1"]
+            if(not isinstance(self.custom1(),str)):
+                self.custom1 = None
+                print("The Custom 1 config function must return a String.")
+        except:
+            self.custom1 = None
+
+        try:
+            self.custom2 = data["custom2"]
+            if(not isinstance(self.custom2(),str)):
+                self.custom2 = None
+                print("The Custom 2 config function must return a String.")
+        except:
+            self.custom2 = None
 
         self.active = []
         self.commands = 0
         self.popular = []
+        
 
     def __session_init(self):
         if self.session is None:
@@ -60,7 +98,31 @@ class Client:
         key = self.key
         servers = str(self.servers)
         users = str(self.users)
-        data = {"id":bot_id,"key":key,"servers":servers,"users":users,"commands":str(self.commands),"active":str(len(self.active)),"popular":self.popular}
+        
+        memactive = "0"
+        memload = "0"
+        cpuload = "0"
+        cputemp = "0"
+        custom1 = "0"
+        custom2 = "0"
+
+        if self.mem:
+            mem = psutil.virtual_memory()
+            memactive = str(mem.used)
+            memload = str(mem.percent)
+
+        if self.cpu:
+            cpuload = str(psutil.cpu_percent(interval=1))
+            cputemp = "-1"
+
+        if self.custom1:
+            custom1 = self.custom1()
+        
+        if self.custom2:
+            custom2 = self.custom2()
+
+        data = {"id":bot_id,"key":key,"servers":servers,"users":users,"commands":str(self.commands),"active":self.active,"popular":self.popular,"memactive":memactive,"memload":memload,"cpuload":cpuload,"cputemp":cputemp,"custom1":custom1,"custom2":custom2}
+        print(data)
         self.active = []
         self.commands = 0
         self.popular = []

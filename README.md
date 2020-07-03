@@ -51,11 +51,11 @@ class StatcordPost(commands.Cog):
     async def on_command(self,ctx):
         self.api.command_run(ctx)
 
-    async def custom1(self):
+    def custom1(self):
         # Do Things Here
         return "10" # Return a string.
 
-    async def custom2(self):
+    def custom2(self):
         # Do Things Here
         return "10" # Return a string.
 
@@ -73,8 +73,16 @@ import statcord
 
 bot = commands.Bot(command_prefix='!')
 
+def custom1(self):
+    # Do Things Here
+    return "10" # Return a string.
+
+def custom2(self):
+    # Do Things Here
+    return "10" # Return a string.
+
 key = "statcord.com-ADDYOURKEYHERE"
-api = statcord.Client(bot,key)
+api = statcord.Client(bot,key,custom1=custom1,custom2=custom2)
 api.start_loop()
 
 @bot.event
@@ -82,12 +90,14 @@ async def on_command(ctx):
     api.command_run(ctx)
 
 
+
+
 bot.run(TOKEN)
 ```
 ### Configuration
 To turn Memory tracking off, `statcord.Client(bot,key,mem = False)`
 To turn CPU tracking off, `statcord.Client(bot,key,cpu = False)`
-
+To activate a custom graph, `statcord.Client(bot,key,custom1 = function)`
 
 ## Contributing
 

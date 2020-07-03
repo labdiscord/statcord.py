@@ -18,6 +18,8 @@ class Client:
         self.custom1 = None
         self.custom2 = None
 
+        self.debug = False
+
         try:
             if (isinstance(data["mem"],bool)):
                 self.mem = data["mem"]
@@ -34,25 +36,31 @@ class Client:
         except:
             self.cpu = True
 
+
+        try:
+            if (isinstance(data["debug"],bool)):
+                self.debug = data["debug"]
+            else:
+                print("Debug config must be a Boolean.")
+        except:
+            self.debug = False
+
         try:
             self.custom1 = data["custom1"]
-            if(not isinstance(self.custom1(),str)):
-                self.custom1 = None
-                print("The Custom 1 config function must return a String.")
         except:
-            self.custom1 = None
+            self.custom1 = False
 
         try:
             self.custom2 = data["custom2"]
-            if(not isinstance(self.custom2(),str)):
-                self.custom2 = None
-                print("The Custom 2 config function must return a String.")
         except:
-            self.custom2 = None
+            self.custom2 = False
 
         self.active = []
         self.commands = 0
         self.popular = []
+
+        if self.debug:
+            print("Debug Mode Enabled")
         
 
     def __session_init(self):
@@ -116,13 +124,14 @@ class Client:
             cputemp = "-1"
 
         if self.custom1:
-            custom1 = self.custom1()
+            custom1 = await self.custom1()
         
         if self.custom2:
-            custom2 = self.custom2()
+            custom2 = await self.custom1()
 
-        data = {"id":bot_id,"key":key,"servers":servers,"users":users,"commands":str(self.commands),"active":self.active,"popular":self.popular,"memactive":memactive,"memload":memload,"cpuload":cpuload,"cputemp":cputemp,"custom1":custom1,"custom2":custom2}
-        print(data)
+        data =  {"id":bot_id,"key":key,"servers":servers,"users":users,"commands":str(self.commands),"active":self.active,"popular":self.popular,"memactive":memactive,"memload":memload,"cpuload":cpuload,"cputemp":cputemp,"custom1":custom1,"custom2":custom2}
+        if self.debug:
+            print(data)
         self.active = []
         self.commands = 0
         self.popular = []

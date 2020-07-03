@@ -51,11 +51,11 @@ class StatcordPost(commands.Cog):
     async def on_command(self,ctx):
         self.api.command_run(ctx)
 
-    def custom1(self):
+    async def custom1(self):
         # Do Things Here
         return "10" # Return a string.
 
-    def custom2(self):
+    async def custom2(self):
         # Do Things Here
         return "10" # Return a string.
 
@@ -73,11 +73,11 @@ import statcord
 
 bot = commands.Bot(command_prefix='!')
 
-def custom1(self):
+async def custom1(self):
     # Do Things Here
     return "10" # Return a string.
 
-def custom2(self):
+async def custom2(self):
     # Do Things Here
     return "10" # Return a string.
 

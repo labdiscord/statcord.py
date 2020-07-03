@@ -36,7 +36,7 @@ class Client:
 
         try:
             self.custom1 = data["custom1"]
-            if(not isinstance(self.custom1(),str)):
+            if(not isinstance(await self.custom1(),str)):
                 self.custom1 = None
                 print("The Custom 1 config function must return a String.")
         except:
@@ -44,7 +44,7 @@ class Client:
 
         try:
             self.custom2 = data["custom2"]
-            if(not isinstance(self.custom2(),str)):
+            if(not isinstance(await self.custom2(),str)):
                 self.custom2 = None
                 print("The Custom 2 config function must return a String.")
         except:

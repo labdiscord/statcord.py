@@ -58,6 +58,7 @@ class Client:
         self.active = []
         self.commands = 0
         self.popular = []
+        psutil.cpu_percent()
 
         if self.debug:
             print("Debug Mode Enabled")
@@ -120,7 +121,7 @@ class Client:
             memload = str(mem.percent)
 
         if self.cpu:
-            cpuload = str(psutil.cpu_percent(interval=1))
+            cpuload = str(psutil.cpu_percent())
             cputemp = "-1"
 
         if self.custom1:

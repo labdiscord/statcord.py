@@ -38,7 +38,7 @@ class Client:
             if isinstance(kwargs["debug"],bool):
                 self.cpu=kwargs["debug"]
             else:
-                raise TypeError(f"CPU config : expected type bool, not {kwargs['debug'].__type__()}")
+                raise TypeError("CPU config : expected type bool")
         else:
             self.debug = False
 

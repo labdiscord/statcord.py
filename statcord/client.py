@@ -50,7 +50,7 @@ class Client:
         psutil.cpu_percent()
 
         if self.debug:
-            print("Debug Mode Enabled")
+            print("Statcord debug mode enabled")
 
     def __headers(self):
         return {'Content-Type': 'application/json'}
@@ -61,7 +61,10 @@ class Client:
         if status == 200:
             return json
         elif status == 429:
-            return json # Skip post until next time. (60s isnt much)
+            if self.debug:
+                wait = (int(json.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
+                print(f"We have been ratelimited: {wait}")
+            return json
         else:
             raise exceptions.RequestFailure(status=status,response=json)
 
@@ -120,6 +123,7 @@ class Client:
             "custom2":custom2,
         }
         if self.debug:
+            print("Posting data")
             print(data)
         self.active = []
         self.commands = 0

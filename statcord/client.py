@@ -91,7 +91,7 @@ class Client:
             cpuload = str(psutil.cpu_percent())
             cputemp = "-1"
         else:
-             cpuload = "0"
+            cpuload = "0"
             cputemp = "0"
 
         if self.custom1:

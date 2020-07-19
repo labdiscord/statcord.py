@@ -1,173 +1,161 @@
 import asyncio
 import aiohttp
-from discord import User
 import psutil
+from discord import Client as DiscordClient
+from . import exceptions
+
 
 class Client:
+    """Client for using the statcord API"""
+    def __init__(self, bot, token, **kwargs):
+        if not isinstance(bot,DiscordClient):
+            raise TypeError("Expected class deriving from discord.Client for arg bot")
+        if not isinstance(token,str):
+            raise TypeError("Expected str for arg bot")
 
-    def __init__(self, bot, key, **data):
         self.bot = bot
-        self.key = key
-        self.session = None
+        self.key = token
         self.base = "https://beta.statcord.com/logan/"
-        self.ratelimited = False
+        self.session = aiohttp.ClientSession(loop=bot.loop)
 
-        self.mem = True
-        self.cpu = True
-
-        self.custom1 = None
-        self.custom2 = None
-
-        self.debug = False
-
-        try:
-            if (isinstance(data["mem"],bool)):
-                self.mem = data["mem"]
+        if kwargs.get("mem"):
+            if isinstance(kwargs["mem"],bool):
+                self.mem=kwargs["mem"]
             else:
-                print("Memory config must be a Boolean.")
-        except:
-            self.mem = True
+                raise TypeError("Memory config : expected type bool")
+        else:
+            self.mem=True
 
-        try:
-            if (isinstance(data["cpu"],bool)):
-                self.cpu = data["cpu"]
+        if kwargs.get("cpu"):
+            if isinstance(kwargs["cpu"],bool):
+                self.cpu=kwargs["cpu"]
             else:
-                print("CPU config must be a Boolean.")
-        except:
+                raise TypeError("CPU config : expected type bool")
+        else:
             self.cpu = True
 
-
-        try:
-            if (isinstance(data["debug"],bool)):
-                self.debug = data["debug"]
+        if kwargs.get("debug"):
+            if isinstance(kwargs["debug"],bool):
+                self.debug=kwargs["debug"]
             else:
-                print("Debug config must be a Boolean.")
-        except:
+                raise TypeError("Debug config : expected type bool")
+        else:
             self.debug = False
 
-        try:
-            self.custom1 = data["custom1"]
-        except:
-            self.custom1 = False
-
-        try:
-            self.custom2 = data["custom2"]
-        except:
-            self.custom2 = False
-
+        self.custom1 = kwargs.get("custom1") or False
+        self.custom2 = kwargs.get("custom2") or False
         self.active = []
         self.commands = 0
         self.popular = []
         psutil.cpu_percent()
 
         if self.debug:
-            print("Debug Mode Enabled")
-        
+            print("Statcord debug mode enabled")
 
-    def __session_init(self):
-        if self.session is None:
-            self.session = aiohttp.ClientSession()
-    
     def __headers(self):
-        return {'content-type': 'application/json'}
-    
-    async def __handle_response(self, resp: aiohttp.ClientResponse) -> dict:
+        return {'Content-Type': 'application/json'}
 
-        status = resp.status
-        response = await resp.text()
+    async def __handle_response(self, res: aiohttp.ClientResponse) -> dict:
+        try:
+            msg = await res.json() or {}
+        except aiohttp.ContentTypeError:
+            msg = await res.text()
+        status = res.status
+        if status == 200:
+            return msg
+        elif status == 429:
+            wait = (int(msg.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
+            print(f"You have been ratelimited: {wait}")
+            return msg
+        else:
+            raise exceptions.RequestFailure(status=status,response=msg)
 
-        json = await resp.json() or {}
-
-        # Error
-        if status != 200:
-            print(response)
-            self.ratelimited = True
-        elif self.ratelimited:
-            print(response)
-            self.ratelimited = False
-
-
-        return json
+        return msg
 
     @property
     def servers(self):
-        try:
-            count = len(self.bot.guilds)
-        except AttributeError:
-            count = len(self.bot.servers)
-
-        return count
+        return str(len(self.bot.guilds))
 
     @property
     def users(self):
-        return len(self.bot.users)
+        return str(len(self.bot.users))
 
     async def post_data(self):
-        bot_id = str(self.bot.user.id)
-        key = self.key
-        servers = str(self.servers)
-        users = str(self.users)
-        
-        memactive = "0"
-        memload = "0"
-        cpuload = "0"
-        cputemp = "0"
-        custom1 = "0"
-        custom2 = "0"
+        id = str(self.bot.user.id)
+        commands = str(self.commands)
 
         if self.mem:
             mem = psutil.virtual_memory()
             memactive = str(mem.used)
             memload = str(mem.percent)
+        else:
+            memactive = "0"
+            memload = "0"
 
         if self.cpu:
             cpuload = str(psutil.cpu_percent())
             cputemp = "-1"
+        else:
+            cpuload = "0"
+            cputemp = "0"
 
         if self.custom1:
-            custom1 = await self.custom1()
-        
-        if self.custom2:
-            custom2 = await self.custom1()
+            custom1 = str(await self.custom1())
+        else:
+            custom1 = "0"
 
-        data =  {"id":bot_id,"key":key,"servers":servers,"users":users,"commands":str(self.commands),"active":self.active,"popular":self.popular,"memactive":memactive,"memload":memload,"cpuload":cpuload,"cputemp":cputemp,"custom1":custom1,"custom2":custom2}
+        if self.custom2:
+            custom2 = str(await self.custom2())
+        else:
+            custom2 = "0"
+
+        data = {
+            "id":id,
+            "key":self.key,
+            "servers":self.servers,
+            "users":self.users,
+            "commands":commands,
+            "active":self.active,
+            "popular":self.popular,
+            "memactive":memactive,
+            "memload":memload,
+            "cpuload":cpuload,
+            "cputemp":cputemp,
+            "custom1":custom1,
+            "custom2":custom2,
+        }
         if self.debug:
+            print("Posting data")
             print(data)
         self.active = []
         self.commands = 0
         self.popular = []
 
-        self.__session_init()
         async with self.session.post(url=self.base + "stats", json=data, headers=self.__headers()) as resp:
-            try:
-                return await self.__handle_response(resp)
-            except:
-                pass
-
+            res = await self.__handle_response(resp)
+            if self.debug:
+                print(res)
 
     def start_loop(self):
         self.bot.loop.create_task(self.__loop())
 
     def command_run(self,ctx):
         self.commands += 1
-        if (ctx.author.id not in self.active):
+        if ctx.author.id not in self.active:
             self.active.append(ctx.author.id)
 
-        command = str(ctx.command)
-        command = command.split(" ")
-        command = command[0]
+        command = ctx.command.name
         found = False
-        for j in range(len(self.popular)):
-            if self.popular[j]["name"] == command:
+        popular = list(self.popular)
+        self.popular= []
+        for cmd in popular:
+            if cmd["name"] == command:
                 found = True
-                fd=j
-                
+                cmd["count"] = str(int(cmd["count"]) + 1)
+            self.popular.append(cmd)
+
         if not found:
             self.popular.append({"name":command,"count":"1"})
-        else:
-            self.popular[fd]["count"] = str(int(self.popular[fd]["count"])+1)
-
-        
 
     async def __loop(self):
         """
@@ -176,5 +164,8 @@ class Client:
         await self.bot.wait_until_ready()
         print("Statcord Auto Post has started!")
         while not self.bot.is_closed():
-            await self.post_data()
+            try:
+                await self.post_data()
+            except exceptions.StatcordException:
+                pass
             await asyncio.sleep(60)

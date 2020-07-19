@@ -59,7 +59,7 @@ class Client:
         try:
             msg = await res.json() or {}
         except aiohttp.ContentTypeError:
-            msg = res.text()
+            msg = await res.text()
         status = res.status
         if status == 200:
             return msg

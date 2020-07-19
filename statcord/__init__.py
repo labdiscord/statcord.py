@@ -1,15 +1,15 @@
-__title__ = 'statcord.py'
+__title__ = 'statcord.py-beta'
 __author__ = 'statcord.com'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2020, statcord.com'
-__version__ = '2.2.0'
+__version__ = '2.1.7'
 
 name = "statcord"
 
-from collections import namedtuple
-from .client import Client
-from .exceptions import *
+from collections import namedtuple # noqa E402
+from .client import Client # noqa E402
+from .exceptions import * # noqa E402
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
 
-version_info = VersionInfo(major=2, minor=2, micro=0, releaselevel='final', serial=0)
+version_info = VersionInfo(major=2, minor=1, micro=7, releaselevel='final', serial=0)

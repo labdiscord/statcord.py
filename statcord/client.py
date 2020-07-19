@@ -64,9 +64,8 @@ class Client:
         if status == 200:
             return msg
         elif status == 429:
-            if self.debug:
-                wait = (int(msg.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
-                print(f"We have been ratelimited: {wait}")
+            wait = (int(msg.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
+            print(f"You have been ratelimited: {wait}")
             return msg
         else:
             raise exceptions.RequestFailure(status=status,response=msg)

@@ -56,19 +56,22 @@ class Client:
         return {'Content-Type': 'application/json'}
 
     async def __handle_response(self, res: aiohttp.ClientResponse) -> dict:
-        json = await res.json() or {}
+        try:
+            msg = await res.json() or {}
+        except aiohttp.ContentTypeError:
+            msg = res.text()
         status = res.status
         if status == 200:
-            return json
+            return msg
         elif status == 429:
             if self.debug:
-                wait = (int(json.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
+                wait = (int(msg.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
                 print(f"We have been ratelimited: {wait}")
-            return json
+            return msg
         else:
-            raise exceptions.RequestFailure(status=status,response=json)
+            raise exceptions.RequestFailure(status=status,response=msg)
 
-        return json
+        return msg
 
     @property
     def servers(self):

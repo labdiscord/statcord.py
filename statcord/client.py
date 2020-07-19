@@ -7,14 +7,14 @@ from . import exceptions
 
 class Client:
     """Client for using the statcord API"""
-    def __init__(self, bot, key, **kwargs):
+    def __init__(self, bot, token, **kwargs):
         if not isinstance(bot,DiscordClient):
             raise TypeError("Expected class deriving from discord.Client for arg bot")
-        if not isinstance(bot,str):
+        if not isinstance(token,str):
             raise TypeError("Expected str for arg bot")
 
         self.bot = bot
-        self.key = key
+        self.key = token
         self.base = "https://beta.statcord.com/logan/"
         self.session = aiohttp.ClientSession(loop=bot.loop)
 

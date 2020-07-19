@@ -133,7 +133,9 @@ class Client:
         self.popular = []
 
         async with self.session.post(url=self.base + "stats", json=data, headers=self.__headers()) as resp:
-            return await self.__handle_response(resp)
+            res = await self.__handle_response(resp)
+            if self.debug:
+                print(res)
 
     def start_loop(self):
         self.bot.loop.create_task(self.__loop())

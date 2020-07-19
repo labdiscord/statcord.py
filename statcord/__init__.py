@@ -6,9 +6,9 @@ __version__ = '2.1.6'
 
 name = "statcord"
 
-from collections import namedtuple
-from .client import Client
-from .exceptions import *
+from collections import namedtuple # noqa E402
+from .client import Client # noqa E402
+from .exceptions import * # noqa E402
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
 

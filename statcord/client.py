@@ -103,7 +103,7 @@ class Client:
             custom1 = "0"
 
         if self.custom2:
-            custom2 = str(await self.custom1())
+            custom2 = str(await self.custom2())
         else:
             custom2 = "0"
 

@@ -34,6 +34,14 @@ class Client:
         else:
             self.cpu = True
 
+        if kwargs.get("bandwidth"):
+            if isinstance(kwargs["bandwidth"],bool):
+                self.bandwidth=kwargs["bandwidth"]
+            else:
+                raise TypeError("Bandwidth config : expected type bool")
+        else:
+            self.bandwidth = True
+
         if kwargs.get("debug"):
             if isinstance(kwargs["debug"],bool):
                 self.debug=kwargs["debug"]
@@ -47,6 +55,7 @@ class Client:
         self.active = []
         self.commands = 0
         self.popular = []
+        self.previous_bandwidth = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
         psutil.cpu_percent()
 
         if self.debug:
@@ -94,10 +103,15 @@ class Client:
 
         if self.cpu:
             cpuload = str(psutil.cpu_percent())
-            cputemp = "-1"
         else:
             cpuload = "0"
-            cputemp = "0"
+
+        if self.bandwidth:
+            current_bandwidth = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
+            bandwidth = str(current_bandwidth-self.previous_bandwidth)
+            self.previous_bandwidth = current_bandwidth
+        else:
+            bandwidth = "0"
 
         if self.custom1:
             custom1 = str(await self.custom1())
@@ -120,7 +134,7 @@ class Client:
             "memactive":memactive,
             "memload":memload,
             "cpuload":cpuload,
-            "cputemp":cputemp,
+            "bandwidth":bandwidth,
             "custom1":custom1,
             "custom2":custom2,
         }

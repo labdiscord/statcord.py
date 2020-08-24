@@ -9,7 +9,7 @@ class Client:
     def __init__(self, bot, key):
         self.bot = bot
         self.key = token
-        self.base = "https://beta.statcord.com/logan/"
+        self.base = "https://statcord.com/logan/"
         self.session = aiohttp.ClientSession(loop=bot.loop)
 
         if kwargs.get("mem"):

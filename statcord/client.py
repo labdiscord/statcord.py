@@ -1,18 +1,12 @@
 import asyncio
 import aiohttp
-import psutil
-from discord import Client as DiscordClient
-from . import exceptions
+from discord import User
+from .exceptions import *
 
 
 class Client:
-    """Client for using the statcord API"""
-    def __init__(self, bot, token, **kwargs):
-        if not isinstance(bot,DiscordClient):
-            raise TypeError("Expected class deriving from discord.Client for arg bot")
-        if not isinstance(token,str):
-            raise TypeError("Expected str for arg bot")
 
+    def __init__(self, bot, key):
         self.bot = bot
         self.key = token
         self.base = "https://beta.statcord.com/logan/"
@@ -50,8 +44,6 @@ class Client:
         else:
             self.debug = False
 
-        self.custom1 = kwargs.get("custom1") or False
-        self.custom2 = kwargs.get("custom2") or False
         self.active = []
         self.commands = 0
         self.popular = []
@@ -61,33 +53,43 @@ class Client:
         if self.debug:
             print("Statcord debug mode enabled")
 
+    def __session_init(self):
+        if self.session is None:
+            self.session = aiohttp.ClientSession()
+    
     def __headers(self):
-        return {'Content-Type': 'application/json'}
+        return {'content-type': 'application/json'}
+    
+    async def __handle_response(self, resp: aiohttp.ClientResponse) -> dict:
 
-    async def __handle_response(self, res: aiohttp.ClientResponse) -> dict:
-        try:
-            msg = await res.json() or {}
-        except aiohttp.ContentTypeError:
-            msg = await res.text()
-        status = res.status
-        if status == 200:
-            return msg
-        elif status == 429:
-            wait = (int(msg.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
-            print(f"You have been ratelimited: {wait}")
-            return msg
-        else:
-            raise exceptions.RequestFailure(status=status,response=msg)
+        status = resp.status
+        response = await resp.text()
 
-        return msg
+        json = await resp.json() or {}
+
+        # Error
+        if status != 200:
+            print(response)
+            self.ratelimited = True
+        elif self.ratelimited:
+            print(response)
+            self.ratelimited = False
+
+
+        return json
 
     @property
     def servers(self):
-        return str(len(self.bot.guilds))
+        try:
+            count = len(self.bot.guilds)
+        except AttributeError:
+            count = len(self.bot.servers)
+
+        return count
 
     @property
     def users(self):
-        return str(len(self.bot.users))
+        return len(self.bot.users)
 
     async def post_data(self):
         id = str(self.bot.user.id)
@@ -145,31 +147,37 @@ class Client:
         self.commands = 0
         self.popular = []
 
+        self.__session_init()
         async with self.session.post(url=self.base + "stats", json=data, headers=self.__headers()) as resp:
-            res = await self.__handle_response(resp)
-            if self.debug:
-                print(res)
+            try:
+                return await self.__handle_response(resp)
+            except:
+                pass
+
 
     def start_loop(self):
         self.bot.loop.create_task(self.__loop())
 
     def command_run(self,ctx):
         self.commands += 1
-        if ctx.author.id not in self.active:
+        if (ctx.author.id not in self.active):
             self.active.append(ctx.author.id)
 
-        command = ctx.command.name
+        command = str(ctx.command)
+        command = command.split(" ")
+        command = command[0]
         found = False
-        popular = list(self.popular)
-        self.popular= []
-        for cmd in popular:
-            if cmd["name"] == command:
+        for j in range(len(self.popular)):
+            if self.popular[j]["name"] == command:
                 found = True
-                cmd["count"] = str(int(cmd["count"]) + 1)
-            self.popular.append(cmd)
-
+                fd=j
+                
         if not found:
             self.popular.append({"name":command,"count":"1"})
+        else:
+            self.popular[fd]["count"] = str(int(self.popular[fd]["count"])+1)
+
+        
 
     async def __loop(self):
         """
@@ -178,8 +186,5 @@ class Client:
         await self.bot.wait_until_ready()
         print("Statcord Auto Post has started!")
         while not self.bot.is_closed():
-            try:
-                await self.post_data()
-            except exceptions.StatcordException:
-                pass
+            await self.post_data()
             await asyncio.sleep(60)

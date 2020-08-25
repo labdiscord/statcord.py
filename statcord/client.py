@@ -8,14 +8,50 @@ class Client:
 
     def __init__(self, bot, key):
         self.bot = bot
-        self.key = key
-        self.session = None
-        self.base = "https://statcord.com/mason/"
-        self.ratelimited = False
+        self.key = token
+        self.base = "https://statcord.com/logan/"
+        self.session = aiohttp.ClientSession(loop=bot.loop)
+
+        if kwargs.get("mem"):
+            if isinstance(kwargs["mem"],bool):
+                self.mem=kwargs["mem"]
+            else:
+                raise TypeError("Memory config : expected type bool")
+        else:
+            self.mem=True
+
+        if kwargs.get("cpu"):
+            if isinstance(kwargs["cpu"],bool):
+                self.cpu=kwargs["cpu"]
+            else:
+                raise TypeError("CPU config : expected type bool")
+        else:
+            self.cpu = True
+
+        if kwargs.get("bandwidth"):
+            if isinstance(kwargs["bandwidth"],bool):
+                self.bandwidth=kwargs["bandwidth"]
+            else:
+                raise TypeError("Bandwidth config : expected type bool")
+        else:
+            self.bandwidth = True
+
+        if kwargs.get("debug"):
+            if isinstance(kwargs["debug"],bool):
+                self.debug=kwargs["debug"]
+            else:
+                raise TypeError("Debug config : expected type bool")
+        else:
+            self.debug = False
 
         self.active = []
         self.commands = 0
         self.popular = []
+        self.previous_bandwidth = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
+        psutil.cpu_percent()
+
+        if self.debug:
+            print("Statcord debug mode enabled")
 
     def __session_init(self):
         if self.session is None:
@@ -56,11 +92,57 @@ class Client:
         return len(self.bot.users)
 
     async def post_data(self):
-        bot_id = str(self.bot.user.id)
-        key = self.key
-        servers = str(self.servers)
-        users = str(self.users)
-        data = {"id":bot_id,"key":key,"servers":servers,"users":users,"commands":str(self.commands),"active":str(len(self.active)),"popular":self.popular}
+        id = str(self.bot.user.id)
+        commands = str(self.commands)
+
+        if self.mem:
+            mem = psutil.virtual_memory()
+            memactive = str(mem.used)
+            memload = str(mem.percent)
+        else:
+            memactive = "0"
+            memload = "0"
+
+        if self.cpu:
+            cpuload = str(psutil.cpu_percent())
+        else:
+            cpuload = "0"
+
+        if self.bandwidth:
+            current_bandwidth = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
+            bandwidth = str(current_bandwidth-self.previous_bandwidth)
+            self.previous_bandwidth = current_bandwidth
+        else:
+            bandwidth = "0"
+
+        if self.custom1:
+            custom1 = str(await self.custom1())
+        else:
+            custom1 = "0"
+
+        if self.custom2:
+            custom2 = str(await self.custom2())
+        else:
+            custom2 = "0"
+
+        data = {
+            "id":id,
+            "key":self.key,
+            "servers":self.servers,
+            "users":self.users,
+            "commands":commands,
+            "active":self.active,
+            "popular":self.popular,
+            "memactive":memactive,
+            "memload":memload,
+            "cpuload":cpuload,
+            "bandwidth":bandwidth,
+            "custom1":custom1,
+            "custom2":custom2,
+        }
+        if self.debug:
+            print("Posting data")
+            print(data)
         self.active = []
         self.commands = 0
         self.popular = []

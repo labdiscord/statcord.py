@@ -9,20 +9,20 @@ class Client:
     """Client for using the statcord API"""
     def __init__(self, bot, token, **kwargs):
         if not isinstance(bot,DiscordClient):
-            raise TypeError("Expected class deriving from discord.Client for arg bot")
+            raise TypeError(f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}")
         if not isinstance(token,str):
-            raise TypeError("Expected str for arg bot")
+            raise TypeError(f"Expected str for arg token not {token.__class__.__qualname__}")
 
         self.bot = bot
         self.key = token
-        self.base = "https://beta.statcord.com/logan/"
+        self.base = "https://statcord.com/logan/"
         self.session = aiohttp.ClientSession(loop=bot.loop)
 
         if kwargs.get("mem"):
             if isinstance(kwargs["mem"],bool):
                 self.mem=kwargs["mem"]
             else:
-                raise TypeError("Memory config : expected type bool")
+                raise TypeError(f"Memory config : expected type bool not {kwargs['mem'].__class__.__qualname__}")
         else:
             self.mem=True
 
@@ -30,7 +30,7 @@ class Client:
             if isinstance(kwargs["cpu"],bool):
                 self.cpu=kwargs["cpu"]
             else:
-                raise TypeError("CPU config : expected type bool")
+                raise TypeError(f"CPU config : expected type bool not {kwargs['cpu'].__class__.__qualname__}")
         else:
             self.cpu = True
 
@@ -38,7 +38,7 @@ class Client:
             if isinstance(kwargs["debug"],bool):
                 self.debug=kwargs["debug"]
             else:
-                raise TypeError("Debug config : expected type bool")
+                raise TypeError(f"Debug config : expected type bool not {kwargs['debug'].__class__.__qualname__}")
         else:
             self.debug = False
 
@@ -65,7 +65,7 @@ class Client:
             return msg
         elif status == 429:
             wait = (int(msg.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
-            print(f"You have been ratelimited: {wait}")
+            print(f"You have been ratelimited posting to statcord: {wait}")
             return msg
         else:
             raise exceptions.RequestFailure(status=status,response=msg)

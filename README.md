@@ -40,13 +40,21 @@ class StatcordPost(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.key = "statcord.com-ADDYOURKEYHERE"
-        self.api = statcord.Client(self.bot,self.key)
+        self.api = statcord.Client(self.bot,self.key,custom1=self.custom1,custom2=self.custom2)
         self.api.start_loop()
         
 
     @commands.Cog.listener()
     async def on_command(self,ctx):
         self.api.command_run(ctx)
+
+    async def custom1(self):
+        # Do Things Here
+        return "10" # Return a string.
+
+    async def custom2(self):
+        # Do Things Here
+        return "10" # Return a string.
 
 
 def setup(bot):

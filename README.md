@@ -25,9 +25,6 @@ python3 -m pip install statcord.py
 
 * AUTOMATIC server & user counts updating.
 * AUTOMATIC commands & active users updating.
-* AUTOMATIC resource usage posting.
-* AUTOMATIC custom function usage.
-* Support provided via [discord](https://statcord.com/discord)
 
 ## Posting Server & User Counts, Active Users and Popular Commands.
 
@@ -73,16 +70,8 @@ import statcord
 
 bot = commands.Bot(command_prefix='!')
 
-async def custom1(self):
-    # Do Things Here
-    return "10" # Return a string.
-
-async def custom2(self):
-    # Do Things Here
-    return "10" # Return a string.
-
 key = "statcord.com-ADDYOURKEYHERE"
-api = statcord.Client(bot,key,custom1=custom1,custom2=custom2)
+api = statcord.Client(bot,key)
 api.start_loop()
 
 @bot.event
@@ -90,14 +79,8 @@ async def on_command(ctx):
     api.command_run(ctx)
 
 
-
-
 bot.run(TOKEN)
 ```
-### Configuration
-To turn Memory tracking off, `statcord.Client(bot,key,mem = False)`
-To turn CPU tracking off, `statcord.Client(bot,key,cpu = False)`
-To activate a custom graph, `statcord.Client(bot,key,custom1 = function)`
 
 ## Contributing
 

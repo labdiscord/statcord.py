@@ -11,5 +11,4 @@ from .client import Client
 from .exceptions import *
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
-
 version_info = VersionInfo(major=3, minor=0, micro=5, releaselevel='final', serial=0)

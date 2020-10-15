@@ -87,7 +87,7 @@ class Client:
 
     @property
     def users(self):
-        return str(len(self.bot.users))
+        return str(sum(g.member_count for g in self.bot.guilds))
 
     async def post_data(self):
         id = str(self.bot.user.id)
@@ -108,7 +108,7 @@ class Client:
 
         if self.bandwidth:
             current_bandwidth = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
-            bandwidth = str(current_bandwidth-self.previous_bandwidth)
+            bandwidth = str(current_bandwidth - self.previous_bandwidth)
             self.previous_bandwidth = current_bandwidth
         else:
             bandwidth = "0"
@@ -180,6 +180,9 @@ class Client:
         while not self.bot.is_closed():
             try:
                 await self.post_data()
-            except exceptions.StatcordException:
-                pass
+            except Exception as e:
+                await self.on_error(e)
             await asyncio.sleep(60)
+
+    async def on_error(self,error):
+        print(f"Statcord posting exception occured: {error.__class__.__qualname__} - {error}")

@@ -11,6 +11,7 @@ class Client:
     def __init__(self, bot, token, **kwargs):
         if not isinstance(bot, DiscordClient):
             raise TypeError(f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}")
+
         if not isinstance(token, str):
             raise TypeError(f"Expected str for arg token not {token.__class__.__qualname__}")
 
@@ -70,7 +71,9 @@ class Client:
             msg = await res.json() or {}
         except aiohttp.ContentTypeError:
             msg = await res.text()
+
         status = res.status
+
         if status == 200:
             return msg
         elif status == 429:
@@ -139,9 +142,11 @@ class Client:
             "custom1":custom1,
             "custom2":custom2,
         }
+
         if self.debug:
             print("Posting data")
             print(data)
+
         self.active = []
         self.commands = 0
         self.popular = []
@@ -156,6 +161,7 @@ class Client:
 
     def command_run(self,ctx):
         self.commands += 1
+
         if ctx.author.id not in self.active:
             self.active.append(ctx.author.id)
 
@@ -163,10 +169,12 @@ class Client:
         found = False
         popular = list(self.popular)
         self.popular = []
+
         for cmd in popular:
             if cmd["name"] == command:
                 found = True
                 cmd["count"] = str(int(cmd["count"]) + 1)
+
             self.popular.append(cmd)
 
         if not found:
@@ -179,11 +187,13 @@ class Client:
 
         await self.bot.wait_until_ready()
         print("Statcord Auto Post has started!")
+
         while not self.bot.is_closed():
             try:
                 await self.post_data()
             except Exception as e:
                 await self.on_error(e)
+
             await asyncio.sleep(60)
 
     async def on_error(self,error):

@@ -5,4 +5,4 @@ class StatcordException(Exception):
 
 class RequestFailure(StatcordException):
     def __init__(self, status: int, response: str):
-        super().__init__("{}: {}".format(status, response))
+        super().__init__(f"{status}: {response}")

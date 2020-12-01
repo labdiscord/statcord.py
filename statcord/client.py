@@ -128,19 +128,19 @@ class Client:
             custom2 = "0"
 
         data = {
-            "id":id,
-            "key":self.key,
-            "servers":self.servers,
-            "users":self.users,
-            "commands":commands,
-            "active":self.active,
-            "popular":self.popular,
-            "memactive":memactive,
-            "memload":memload,
-            "cpuload":cpuload,
-            "bandwidth":bandwidth,
-            "custom1":custom1,
-            "custom2":custom2,
+            "id": id,
+            "key": self.key,
+            "servers": self.servers,
+            "users": self.users,
+            "commands": commands,
+            "active": self.active,
+            "popular": self.popular,
+            "memactive": memactive,
+            "memload": memload,
+            "cpuload": cpuload,
+            "bandwidth": bandwidth,
+            "custom1": custom1,
+            "custom2": custom2,
         }
 
         if self.debug:

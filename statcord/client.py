@@ -7,6 +7,7 @@ from . import exceptions
 
 class Client:
     """Client for using the statcord API"""
+
     def __init__(self, bot, token, **kwargs):
         if not isinstance(bot, DiscordClient):
             raise TypeError(f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}")
@@ -175,6 +176,7 @@ class Client:
         """
         The internal loop used for automatically posting server/guild count stats
         """
+        
         await self.bot.wait_until_ready()
         print("Statcord Auto Post has started!")
         while not self.bot.is_closed():

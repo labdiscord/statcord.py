@@ -64,7 +64,7 @@ class Client:
             print("Statcord debug mode enabled")
 
     def __headers(self):
-        return {'Content-Type': 'application/json'}
+        return {"Content-Type": "application/json"}
 
     async def __handle_response(self, res: aiohttp.ClientResponse) -> dict:
         try:

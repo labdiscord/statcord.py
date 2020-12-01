@@ -8,9 +8,9 @@ from . import exceptions
 class Client:
     """Client for using the statcord API"""
     def __init__(self, bot, token, **kwargs):
-        if not isinstance(bot,DiscordClient):
+        if not isinstance(bot, DiscordClient):
             raise TypeError(f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}")
-        if not isinstance(token,str):
+        if not isinstance(token, str):
             raise TypeError(f"Expected str for arg token not {token.__class__.__qualname__}")
 
         self.bot = bot
@@ -19,7 +19,7 @@ class Client:
         self.session = aiohttp.ClientSession(loop=bot.loop)
 
         if kwargs.get("mem"):
-            if isinstance(kwargs["mem"],bool):
+            if isinstance(kwargs["mem"], bool):
                 self.mem=kwargs["mem"]
             else:
                 raise TypeError(f"Memory config : expected type bool not {kwargs['mem'].__class__.__qualname__}")
@@ -27,7 +27,7 @@ class Client:
             self.mem=True
 
         if kwargs.get("cpu"):
-            if isinstance(kwargs["cpu"],bool):
+            if isinstance(kwargs["cpu"], bool):
                 self.cpu=kwargs["cpu"]
             else:
                 raise TypeError(f"CPU config : expected type bool not {kwargs['cpu'].__class__.__qualname__}")
@@ -35,7 +35,7 @@ class Client:
             self.cpu = True
 
         if kwargs.get("bandwidth"):
-            if isinstance(kwargs["bandwidth"],bool):
+            if isinstance(kwargs["bandwidth"], bool):
                 self.bandwidth=kwargs["bandwidth"]
             else:
                 raise TypeError("Bandwidth config : expected type bool")
@@ -43,7 +43,7 @@ class Client:
             self.bandwidth = True
 
         if kwargs.get("debug"):
-            if isinstance(kwargs["debug"],bool):
+            if isinstance(kwargs["debug"], bool):
                 self.debug=kwargs["debug"]
             else:
                 raise TypeError(f"Debug config : expected type bool not {kwargs['debug'].__class__.__qualname__}")
@@ -77,7 +77,7 @@ class Client:
             print(f"You have been ratelimited posting to statcord: {wait}")
             return msg
         else:
-            raise exceptions.RequestFailure(status=status,response=msg)
+            raise exceptions.RequestFailure(status=status, response=msg)
 
         return msg
 
@@ -169,7 +169,7 @@ class Client:
             self.popular.append(cmd)
 
         if not found:
-            self.popular.append({"name":command,"count":"1"})
+            self.popular.append({"name":command, "count":"1"})
 
     async def __loop(self):
         """

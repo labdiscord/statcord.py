@@ -21,15 +21,15 @@ class Client:
 
         if kwargs.get("mem"):
             if isinstance(kwargs["mem"], bool):
-                self.mem=kwargs["mem"]
+                self.mem = kwargs["mem"]
             else:
                 raise TypeError(f"Memory config : expected type bool not {kwargs['mem'].__class__.__qualname__}")
         else:
-            self.mem=True
+            self.mem = True
 
         if kwargs.get("cpu"):
             if isinstance(kwargs["cpu"], bool):
-                self.cpu=kwargs["cpu"]
+                self.cpu = kwargs["cpu"]
             else:
                 raise TypeError(f"CPU config : expected type bool not {kwargs['cpu'].__class__.__qualname__}")
         else:
@@ -37,7 +37,7 @@ class Client:
 
         if kwargs.get("bandwidth"):
             if isinstance(kwargs["bandwidth"], bool):
-                self.bandwidth=kwargs["bandwidth"]
+                self.bandwidth = kwargs["bandwidth"]
             else:
                 raise TypeError("Bandwidth config : expected type bool")
         else:
@@ -45,7 +45,7 @@ class Client:
 
         if kwargs.get("debug"):
             if isinstance(kwargs["debug"], bool):
-                self.debug=kwargs["debug"]
+                self.debug = kwargs["debug"]
             else:
                 raise TypeError(f"Debug config : expected type bool not {kwargs['debug'].__class__.__qualname__}")
         else:
@@ -162,7 +162,7 @@ class Client:
         command = ctx.command.name
         found = False
         popular = list(self.popular)
-        self.popular= []
+        self.popular = []
         for cmd in popular:
             if cmd["name"] == command:
                 found = True
@@ -176,7 +176,7 @@ class Client:
         """
         The internal loop used for automatically posting server/guild count stats
         """
-        
+
         await self.bot.wait_until_ready()
         print("Statcord Auto Post has started!")
         while not self.bot.is_closed():

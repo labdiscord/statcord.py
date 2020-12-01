@@ -178,7 +178,7 @@ class Client:
             self.popular.append(cmd)
 
         if not found:
-            self.popular.append({"name":command, "count":"1"})
+            self.popular.append({"name": command, "count": "1"})
 
     async def __loop(self):
         """

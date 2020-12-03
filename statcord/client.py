@@ -73,9 +73,7 @@ class Client:
         if status == 200:
             return msg
         elif status == 429:
-            wait = (int(msg.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
-            print(f"You have been ratelimited posting to statcord: {wait}")
-            return msg
+            raise exceptions.TooManyRequests(status,msg,int(msg.get("wait")))
         else:
             raise exceptions.RequestFailure(status=status,response=msg)
 
@@ -176,7 +174,8 @@ class Client:
         The internal loop used for automatically posting server/guild count stats
         """
         await self.bot.wait_until_ready()
-        print("Statcord Auto Post has started!")
+        if self.debug:
+            print("Statcord Auto Post has started!")
         while not self.bot.is_closed():
             try:
                 await self.post_data()

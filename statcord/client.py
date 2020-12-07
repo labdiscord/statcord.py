@@ -9,9 +9,9 @@ class Client:
     """Client for using the statcord API"""
     def __init__(self, bot, token, **kwargs):
         if not isinstance(bot,DiscordClient):
-            raise TypeError("Expected class deriving from discord.Client for arg bot")
+            raise TypeError(f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}")
         if not isinstance(token,str):
-            raise TypeError("Expected str for arg bot")
+            raise TypeError(f"Expected str for arg token not {token.__class__.__qualname__}")
 
         self.bot = bot
         self.key = token
@@ -22,7 +22,7 @@ class Client:
             if isinstance(kwargs["mem"],bool):
                 self.mem=kwargs["mem"]
             else:
-                raise TypeError("Memory config : expected type bool")
+                raise TypeError(f"Memory config : expected type bool not {kwargs['mem'].__class__.__qualname__}")
         else:
             self.mem=True
 
@@ -30,7 +30,7 @@ class Client:
             if isinstance(kwargs["cpu"],bool):
                 self.cpu=kwargs["cpu"]
             else:
-                raise TypeError("CPU config : expected type bool")
+                raise TypeError(f"CPU config : expected type bool not {kwargs['cpu'].__class__.__qualname__}")
         else:
             self.cpu = True
 
@@ -46,7 +46,7 @@ class Client:
             if isinstance(kwargs["debug"],bool):
                 self.debug=kwargs["debug"]
             else:
-                raise TypeError("Debug config : expected type bool")
+                raise TypeError(f"Debug config : expected type bool not {kwargs['debug'].__class__.__qualname__}")
         else:
             self.debug = False
 
@@ -73,9 +73,7 @@ class Client:
         if status == 200:
             return msg
         elif status == 429:
-            wait = (int(msg.get("wait")) / 1) or 0 # I dont know the units of the rate limit so i cant really do much with it
-            print(f"You have been ratelimited: {wait}")
-            return msg
+            raise exceptions.TooManyRequests(status,msg,int(msg.get("wait")))
         else:
             raise exceptions.RequestFailure(status=status,response=msg)
 
@@ -108,7 +106,7 @@ class Client:
 
         if self.bandwidth:
             current_bandwidth = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
-            bandwidth = str(current_bandwidth-self.previous_bandwidth)
+            bandwidth = str(current_bandwidth - self.previous_bandwidth)
             self.previous_bandwidth = current_bandwidth
         else:
             bandwidth = "0"
@@ -176,10 +174,14 @@ class Client:
         The internal loop used for automatically posting server/guild count stats
         """
         await self.bot.wait_until_ready()
-        print("Statcord Auto Post has started!")
+        if self.debug:
+            print("Statcord Auto Post has started!")
         while not self.bot.is_closed():
             try:
                 await self.post_data()
-            except exceptions.StatcordException:
-                pass
+            except Exception as e:
+                await self.on_error(e)
             await asyncio.sleep(60)
+
+    async def on_error(self,error):
+        print(f"Statcord posting exception occured: {error.__class__.__qualname__} - {error}")

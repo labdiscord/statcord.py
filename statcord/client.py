@@ -87,7 +87,7 @@ class Client:
 
     @property
     def users(self):
-        return str(len(self.bot.users))
+        return str(sum(g.member_count for g in self.bot.guilds))
 
     async def post_data(self):
         id = str(self.bot.user.id)

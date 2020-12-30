@@ -3,6 +3,7 @@ import aiohttp
 import psutil
 from discord import Client as DiscordClient
 from . import exceptions
+import contextlib
 
 
 class Client:
@@ -84,8 +85,14 @@ class Client:
         return str(len(self.bot.guilds))
 
     @property
+    def _user_counter(self):
+        for g in self.bot.guilds:
+            with contextlib.suppress(AttributeError):
+                yield g.member_count
+
+    @property
     def users(self):
-        return str(sum(g.member_count for g in self.bot.guilds))
+        return str(sum(self._user_counter))
 
     async def post_data(self):
         id = str(self.bot.user.id)

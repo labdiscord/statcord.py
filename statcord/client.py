@@ -85,7 +85,10 @@ class Client:
 
     @property
     def users(self):
-        return str(sum(g.member_count for g in self.bot.guilds))
+        try:
+            return str(sum(g.member_count for g in self.bot.guilds))
+        except:
+            return len(self.bot.user)
 
     async def post_data(self):
         id = str(self.bot.user.id)

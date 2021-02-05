@@ -185,16 +185,10 @@ class Client:
 
         command = ctx.command.name
         self.logger.debug(f"Command {command} has been run by {ctx.author.id}")
-        found = False
-        popular = self.popular.copy()
-        self.popular = []
-        for cmd in popular:
-            if cmd["name"] == command:
-                found = True
-                cmd["count"] = str(int(cmd["count"]) + 1)
-            self.popular.append(cmd)
-
-        if not found:
+        for cmd in filter(lambda x: x["name"] == command, self.popular):
+            cmd["count"] = str(int(cmd["count"]) + 1)
+            break
+        else:
             self.popular.append({"name": command, "count": "1"})
 
     async def __loop(self) -> None:

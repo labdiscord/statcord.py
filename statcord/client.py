@@ -1,14 +1,15 @@
 # coding=utf-8
 import asyncio
 import contextlib
-from typing import Optional, Coroutine, Union, List, Dict, Iterable
-
 import aiohttp
 import psutil
+
 from discord import Client as DiscordClient
+from typing import Optional, Coroutine, Union, List, Dict, Iterable
 from discord.ext.commands import Context
 
-from . import exceptions
+# this could be relative, but apparently Python doesn't like it
+from statcord import exceptions
 
 
 class Client:

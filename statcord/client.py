@@ -87,7 +87,8 @@ class Client:
         if status == 200:
             return msg
         elif status == 429:
-            raise exceptions.TooManyRequests(status, msg, int(msg.get("wait")))
+            # noinspection SpellCheckingInspection
+            raise exceptions.TooManyRequests(status, msg, int(msg.get("timeleft")))
         else:
             raise exceptions.RequestFailure(status=status, response=msg)
 

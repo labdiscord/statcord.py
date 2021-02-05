@@ -3,6 +3,7 @@ import asyncio
 import contextlib
 import aiohttp
 import psutil
+import logging
 
 from discord import Client as DiscordClient
 from typing import Optional, Coroutine, Union, List, Dict, Iterable
@@ -16,6 +17,10 @@ class Client:
     """Client for using the statcord API"""
 
     def __init__(self, bot, token, **kwargs):
+        self.logger = logging.getLogger("statcord")
+        self.logging_level = kwargs.get("logging_level", logging.WARNING)
+        self.logger.setLevel(self.logging_level)
+
         if not isinstance(bot, DiscordClient):
             raise TypeError(f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}")
         if not isinstance(token, str):
@@ -31,7 +36,7 @@ class Client:
             if isinstance(kwargs["mem"], bool):
                 self.mem = kwargs["mem"]
             else:
-                raise TypeError(f"Memory config: expected type bool not {kwargs['mem'].__class__.__qualname__}")
+                raise TypeError(f"Memory config: expected type bool not {kwargs['mem'].__class__.__qualname__}.")
         else:
             self.mem = True
 
@@ -68,28 +73,29 @@ class Client:
         self.commands: int = 0
         self.popular: List[Dict[str, Union[str, int]]] = []
         self.previous_bandwidth: int = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
-        psutil.cpu_percent()
 
-        if self.debug:
-            print("Statcord debug mode enabled")
+        self.logger.debug("Statcord debug mode enabled")
 
     @staticmethod
     def __headers() -> Dict[str, str]:
         return {'Content-Type': 'application/json'}
 
-    @staticmethod
-    async def __handle_response(res: aiohttp.ClientResponse) -> dict:
+    # noinspection SpellCheckingInspection
+    async def __handle_response(self, res: aiohttp.ClientResponse) -> dict:
         try:
             msg = await res.json() or {}
         except aiohttp.ContentTypeError:
             msg = await res.text()
+        self.logger.debug(f"Handling response ({res!r}): {msg!s}")
         status = res.status
         if status == 200:
+            self.logger.debug(f"Code 200 OK")
             return msg
         elif status == 429:
-            # noinspection SpellCheckingInspection
+            self.logger.debug(f"Code 429 Too Many Requests: ratelimited for {msg.get('timeleft')}")
             raise exceptions.TooManyRequests(status, msg, int(msg.get("timeleft")))
         else:
+            self.logger.debug(f"Code {status}")
             raise exceptions.RequestFailure(status=status, response=msg)
 
     @property
@@ -107,6 +113,7 @@ class Client:
         return str(sum(self._user_counter))
 
     async def post_data(self) -> None:
+        self.logger.debug("Got request to post data.")
         bot_id = str(self.bot.user.id)
         commands = str(self.commands)
 
@@ -160,17 +167,13 @@ class Client:
             "custom1": custom1,
             "custom2": custom2,
         }
-        if self.debug:
-            print("Posting data")
-            print(data)
+        self.logger.debug(f"Posting stats: {data!s}")
         self.active = []
         self.commands = 0
         self.popular = []
 
         async with self.session.post(url=self.base + "stats", json=data, headers=self.__headers()) as resp:
-            res = await self.__handle_response(resp)
-            if self.debug:
-                print(res)
+            await self.__handle_response(resp)
 
     def start_loop(self) -> None:
         self.bot.loop.create_task(self.__loop())
@@ -181,6 +184,7 @@ class Client:
             self.active.append(ctx.author.id)
 
         command = ctx.command.name
+        self.logger.debug(f"Command {command} has been run by {ctx.author.id}")
         found = False
         popular = self.popular.copy()
         self.popular = []
@@ -199,14 +203,17 @@ class Client:
         """
         await self.bot.wait_until_ready()
         if self.debug:
-            print("Statcord Auto Post has started!")
+            self.logger.debug("Statcord Auto Post has started!")
         while not self.bot.is_closed():
+            self.logger.debug("Posting stats...")
             try:
                 await self.post_data()
             except Exception as e:
+                self.logger.debug("Got error, dispatching error handlers.")
                 await self.on_error(e)
+            else:
+                self.logger.debug("Posted stats successfully.")
             await asyncio.sleep(60)
 
-    # noinspection PyMethodMayBeStatic
     async def on_error(self, error: BaseException) -> None:
-        print(f"Statcord posting exception occurred: {error.__class__.__qualname__} - {error}")
+        self.logger.exception("Statcord posting exception occurred.", exc_info=error)

@@ -1,17 +1,21 @@
+# coding=utf-8
 import asyncio
+import contextlib
+
 import aiohttp
 import psutil
 from discord import Client as DiscordClient
+
 from . import exceptions
-import contextlib
 
 
 class Client:
     """Client for using the statcord API"""
+
     def __init__(self, bot, token, **kwargs):
-        if not isinstance(bot,DiscordClient):
+        if not isinstance(bot, DiscordClient):
             raise TypeError(f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}")
-        if not isinstance(token,str):
+        if not isinstance(token, str):
             raise TypeError(f"Expected str for arg token not {token.__class__.__qualname__}")
 
         self.bot = bot
@@ -20,34 +24,34 @@ class Client:
         self.session = aiohttp.ClientSession(loop=bot.loop)
 
         if kwargs.get("mem"):
-            if isinstance(kwargs["mem"],bool):
-                self.mem=kwargs["mem"]
+            if isinstance(kwargs["mem"], bool):
+                self.mem = kwargs["mem"]
             else:
-                raise TypeError(f"Memory config : expected type bool not {kwargs['mem'].__class__.__qualname__}")
+                raise TypeError(f"Memory config: expected type bool not {kwargs['mem'].__class__.__qualname__}")
         else:
-            self.mem=True
+            self.mem = True
 
         if kwargs.get("cpu"):
-            if isinstance(kwargs["cpu"],bool):
-                self.cpu=kwargs["cpu"]
+            if isinstance(kwargs["cpu"], bool):
+                self.cpu = kwargs["cpu"]
             else:
-                raise TypeError(f"CPU config : expected type bool not {kwargs['cpu'].__class__.__qualname__}")
+                raise TypeError(f"CPU config: expected type bool not {kwargs['cpu'].__class__.__qualname__}")
         else:
             self.cpu = True
 
         if kwargs.get("bandwidth"):
-            if isinstance(kwargs["bandwidth"],bool):
-                self.bandwidth=kwargs["bandwidth"]
+            if isinstance(kwargs["bandwidth"], bool):
+                self.bandwidth = kwargs["bandwidth"]
             else:
-                raise TypeError("Bandwidth config : expected type bool")
+                raise TypeError("Bandwidth config: expected type bool")
         else:
             self.bandwidth = True
 
         if kwargs.get("debug"):
-            if isinstance(kwargs["debug"],bool):
-                self.debug=kwargs["debug"]
+            if isinstance(kwargs["debug"], bool):
+                self.debug = kwargs["debug"]
             else:
-                raise TypeError(f"Debug config : expected type bool not {kwargs['debug'].__class__.__qualname__}")
+                raise TypeError(f"Debug config: expected type bool not {kwargs['debug'].__class__.__qualname__}")
         else:
             self.debug = False
 
@@ -62,10 +66,12 @@ class Client:
         if self.debug:
             print("Statcord debug mode enabled")
 
-    def __headers(self):
+    @staticmethod
+    def __headers():
         return {'Content-Type': 'application/json'}
 
-    async def __handle_response(self, res: aiohttp.ClientResponse) -> dict:
+    @staticmethod
+    async def __handle_response(res: aiohttp.ClientResponse) -> dict:
         try:
             msg = await res.json() or {}
         except aiohttp.ContentTypeError:
@@ -74,11 +80,9 @@ class Client:
         if status == 200:
             return msg
         elif status == 429:
-            raise exceptions.TooManyRequests(status,msg,int(msg.get("wait")))
+            raise exceptions.TooManyRequests(status, msg, int(msg.get("wait")))
         else:
-            raise exceptions.RequestFailure(status=status,response=msg)
-
-        return msg
+            raise exceptions.RequestFailure(status=status, response=msg)
 
     @property
     def servers(self):
@@ -95,21 +99,21 @@ class Client:
         return str(sum(self._user_counter))
 
     async def post_data(self):
-        id = str(self.bot.user.id)
+        bot_id = str(self.bot.user.id)
         commands = str(self.commands)
 
         if self.mem:
             mem = psutil.virtual_memory()
-            memactive = str(mem.used)
-            memload = str(mem.percent)
+            mem_used = str(mem.used)
+            mem_load = str(mem.percent)
         else:
-            memactive = "0"
-            memload = "0"
+            mem_used = "0"
+            mem_load = "0"
 
         if self.cpu:
-            cpuload = str(psutil.cpu_percent())
+            cpu_load = str(psutil.cpu_percent())
         else:
-            cpuload = "0"
+            cpu_load = "0"
 
         if self.bandwidth:
             current_bandwidth = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
@@ -128,20 +132,21 @@ class Client:
         else:
             custom2 = "0"
 
+        # noinspection SpellCheckingInspection
         data = {
-            "id":id,
-            "key":self.key,
-            "servers":self.servers,
-            "users":self.users,
-            "commands":commands,
-            "active":self.active,
-            "popular":self.popular,
-            "memactive":memactive,
-            "memload":memload,
-            "cpuload":cpuload,
-            "bandwidth":bandwidth,
-            "custom1":custom1,
-            "custom2":custom2,
+            "id": bot_id,
+            "key": self.key,
+            "servers": self.servers,
+            "users": self.users,
+            "commands": commands,
+            "active": self.active,
+            "popular": self.popular,
+            "memactive": mem_used,
+            "memload": mem_load,
+            "cpuload": cpu_load,
+            "bandwidth": bandwidth,
+            "custom1": custom1,
+            "custom2": custom2,
         }
         if self.debug:
             print("Posting data")
@@ -158,7 +163,7 @@ class Client:
     def start_loop(self):
         self.bot.loop.create_task(self.__loop())
 
-    def command_run(self,ctx):
+    def command_run(self, ctx):
         self.commands += 1
         if ctx.author.id not in self.active:
             self.active.append(ctx.author.id)
@@ -166,7 +171,7 @@ class Client:
         command = ctx.command.name
         found = False
         popular = list(self.popular)
-        self.popular= []
+        self.popular = []
         for cmd in popular:
             if cmd["name"] == command:
                 found = True
@@ -174,7 +179,7 @@ class Client:
             self.popular.append(cmd)
 
         if not found:
-            self.popular.append({"name":command,"count":"1"})
+            self.popular.append({"name": command, "count": "1"})
 
     async def __loop(self):
         """
@@ -190,5 +195,6 @@ class Client:
                 await self.on_error(e)
             await asyncio.sleep(60)
 
-    async def on_error(self,error):
-        print(f"Statcord posting exception occured: {error.__class__.__qualname__} - {error}")
+    # noinspection PyMethodMayBeStatic
+    async def on_error(self, error):
+        print(f"Statcord posting exception occurred: {error.__class__.__qualname__} - {error}")

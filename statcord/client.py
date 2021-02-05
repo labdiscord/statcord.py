@@ -1,10 +1,12 @@
 # coding=utf-8
 import asyncio
 import contextlib
+from typing import Optional, Coroutine, Union, List, Dict, Iterable
 
 import aiohttp
 import psutil
 from discord import Client as DiscordClient
+from discord.ext.commands import Context
 
 from . import exceptions
 
@@ -18,11 +20,12 @@ class Client:
         if not isinstance(token, str):
             raise TypeError(f"Expected str for arg token not {token.__class__.__qualname__}")
 
-        self.bot = bot
-        self.key = token
-        self.base = "https://statcord.com/logan/"
-        self.session = aiohttp.ClientSession(loop=bot.loop)
+        self.bot: DiscordClient = bot
+        self.key: str = token
+        self.base: str = "https://statcord.com/logan/"
+        self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=bot.loop)
 
+        self.mem: Optional[bool] = None
         if kwargs.get("mem"):
             if isinstance(kwargs["mem"], bool):
                 self.mem = kwargs["mem"]
@@ -31,6 +34,7 @@ class Client:
         else:
             self.mem = True
 
+        self.cpu: Optional[bool] = None
         if kwargs.get("cpu"):
             if isinstance(kwargs["cpu"], bool):
                 self.cpu = kwargs["cpu"]
@@ -39,6 +43,7 @@ class Client:
         else:
             self.cpu = True
 
+        self.bandwidth: Optional[bool] = None
         if kwargs.get("bandwidth"):
             if isinstance(kwargs["bandwidth"], bool):
                 self.bandwidth = kwargs["bandwidth"]
@@ -47,6 +52,7 @@ class Client:
         else:
             self.bandwidth = True
 
+        self.debug: Optional[bool] = None
         if kwargs.get("debug"):
             if isinstance(kwargs["debug"], bool):
                 self.debug = kwargs["debug"]
@@ -55,19 +61,19 @@ class Client:
         else:
             self.debug = False
 
-        self.custom1 = kwargs.get("custom1") or False
-        self.custom2 = kwargs.get("custom2") or False
-        self.active = []
-        self.commands = 0
-        self.popular = []
-        self.previous_bandwidth = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
+        self.custom1: Union[Coroutine, bool] = kwargs.get("custom1") or False
+        self.custom2: Union[Coroutine, bool] = kwargs.get("custom2") or False
+        self.active: List[int] = []
+        self.commands: int = 0
+        self.popular: List[Dict[str, Union[str, int]]] = []
+        self.previous_bandwidth: int = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
         psutil.cpu_percent()
 
         if self.debug:
             print("Statcord debug mode enabled")
 
     @staticmethod
-    def __headers():
+    def __headers() -> Dict[str, str]:
         return {'Content-Type': 'application/json'}
 
     @staticmethod
@@ -85,20 +91,20 @@ class Client:
             raise exceptions.RequestFailure(status=status, response=msg)
 
     @property
-    def servers(self):
+    def servers(self) -> str:
         return str(len(self.bot.guilds))
 
     @property
-    def _user_counter(self):
+    def _user_counter(self) -> Iterable[int]:
         for g in self.bot.guilds:
             with contextlib.suppress(AttributeError):
                 yield g.member_count
 
     @property
-    def users(self):
+    def users(self) -> str:
         return str(sum(self._user_counter))
 
-    async def post_data(self):
+    async def post_data(self) -> None:
         bot_id = str(self.bot.user.id)
         commands = str(self.commands)
 
@@ -160,17 +166,17 @@ class Client:
             if self.debug:
                 print(res)
 
-    def start_loop(self):
+    def start_loop(self) -> None:
         self.bot.loop.create_task(self.__loop())
 
-    def command_run(self, ctx):
+    def command_run(self, ctx: Context) -> None:
         self.commands += 1
         if ctx.author.id not in self.active:
             self.active.append(ctx.author.id)
 
         command = ctx.command.name
         found = False
-        popular = list(self.popular)
+        popular = self.popular.copy()
         self.popular = []
         for cmd in popular:
             if cmd["name"] == command:
@@ -181,7 +187,7 @@ class Client:
         if not found:
             self.popular.append({"name": command, "count": "1"})
 
-    async def __loop(self):
+    async def __loop(self) -> None:
         """
         The internal loop used for automatically posting server/guild count stats
         """
@@ -196,5 +202,5 @@ class Client:
             await asyncio.sleep(60)
 
     # noinspection PyMethodMayBeStatic
-    async def on_error(self, error):
+    async def on_error(self, error: BaseException) -> None:
         print(f"Statcord posting exception occurred: {error.__class__.__qualname__} - {error}")

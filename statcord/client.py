@@ -1,7 +1,7 @@
 # coding=utf-8
 import asyncio
 import contextlib
-from typing import Optional, Coroutine, Union, List, Dict, Iterable, Awaitable
+from typing import Optional, Coroutine, Union, List, Dict, Iterable
 
 import aiohttp
 import psutil

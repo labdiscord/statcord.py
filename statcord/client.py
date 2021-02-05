@@ -1,7 +1,7 @@
 # coding=utf-8
 import asyncio
 import contextlib
-from typing import Optional, Coroutine, Union, List, Dict, Iterable
+from typing import Optional, Coroutine, Union, List, Dict, Iterable, Awaitable
 
 import aiohttp
 import psutil
@@ -61,8 +61,8 @@ class Client:
         else:
             self.debug = False
 
-        self.custom1: Union[Coroutine, bool] = kwargs.get("custom1") or False
-        self.custom2: Union[Coroutine, bool] = kwargs.get("custom2") or False
+        self.custom1: Optional[Coroutine] = kwargs.get("custom1") or None
+        self.custom2: Optional[Coroutine] = kwargs.get("custom2") or None
         self.active: List[int] = []
         self.commands: int = 0
         self.popular: List[Dict[str, Union[str, int]]] = []
@@ -129,11 +129,15 @@ class Client:
             bandwidth = "0"
 
         if self.custom1:
+            # who knows why PyCharm gets annoyed there /shrug
+            # noinspection PyCallingNonCallable
             custom1 = str(await self.custom1())
         else:
             custom1 = "0"
 
         if self.custom2:
+            # who knows why PyCharm gets annoyed there /shrug
+            # noinspection PyCallingNonCallable
             custom2 = str(await self.custom2())
         else:
             custom2 = "0"

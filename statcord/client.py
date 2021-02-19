@@ -22,10 +22,14 @@ class Client:
         self.logger.setLevel(self.logging_level)
 
         if not isinstance(bot, DiscordClient):
-            raise TypeError(f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}")
+            raise TypeError(
+                f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}"
+            )
 
         if not isinstance(token, str):
-            raise TypeError(f"Expected str for arg token not {token.__class__.__qualname__}")
+            raise TypeError(
+                f"Expected str for arg token not {token.__class__.__qualname__}"
+            )
 
         self.bot: DiscordClient = bot
         self.key: str = token
@@ -34,27 +38,37 @@ class Client:
 
         self.mem: bool = kwargs.get("mem", True)
         if not isinstance(self.mem, bool):
-            raise TypeError(f"Memory config: expected type bool not {self.mem.__class__.__qualname__}.")
+            raise TypeError(
+                f"Memory config: expected type bool not {self.mem.__class__.__qualname__}."
+            )
 
         self.cpu: bool = kwargs.get("cpu", True)
         if not isinstance(self.cpu, bool):
-            raise TypeError(f"CPU config: expected type bool not {self.cpu.__class__.__qualname__}")
+            raise TypeError(
+                f"CPU config: expected type bool not {self.cpu.__class__.__qualname__}"
+            )
 
         self.bandwidth: bool = kwargs.get("bandwidth", True)
         if not isinstance(self.bandwidth, bool):
-            raise TypeError(f"Bandwidth config: expected type bool not {self.bandwidth.__class__.__qualname__}")
+            raise TypeError(
+                f"Bandwidth config: expected type bool not {self.bandwidth.__class__.__qualname__}"
+            )
 
         self.debug: bool = kwargs.get("debug", False)
         if not isinstance(self.debug, bool):
-            raise TypeError(f"Debug config: expected type bool not {self.debug.__class__.__qualname__}")
+            raise TypeError(
+                f"Debug config: expected type bool not {self.debug.__class__.__qualname__}"
+            )
 
-        self.custom1: Optional[Coroutine] = custom1
-        self.custom2: Optional[Coroutine] = custom2
+        self.custom1: Optional[Coroutine] = kwargs.get("custom1")
+        self.custom2: Optional[Coroutine] = kwargs.get("custom2")
 
         self.active: List[int] = []
         self.commands: int = 0
         self.popular: List[Dict[str, Union[str, int]]] = []
-        self.previous_bandwidth: int = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
+        self.previous_bandwidth: int = (
+            psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
+        )
 
         self.logger.debug("Statcord debug mode enabled")
 
@@ -85,7 +99,9 @@ class Client:
             self.logger.debug(f"Code 200 OK")
             return msg
         elif status == 429:
-            self.logger.debug(f"Code 429 Too Many Requests: ratelimited for {msg.get('timeleft')}")
+            self.logger.debug(
+                f"Code 429 Too Many Requests: ratelimited for {msg.get('timeleft')}"
+            )
             raise exceptions.TooManyRequests(status, msg, int(msg.get("timeleft")))
         else:
             self.logger.debug(f"Code {status}")
@@ -125,7 +141,10 @@ class Client:
             cpu_load = "0"
 
         if self.bandwidth:
-            current_bandwidth = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
+            current_bandwidth = (
+                psutil.net_io_counters().bytes_sent
+                + psutil.net_io_counters().bytes_recv
+            )
             bandwidth = str(current_bandwidth - self.previous_bandwidth)
             self.previous_bandwidth = current_bandwidth
         else:
@@ -168,7 +187,9 @@ class Client:
         self.commands = 0
         self.popular = []
 
-        async with self.session.post(url=self.base + "stats", json=data, headers=self.__headers()) as resp:
+        async with self.session.post(
+            url=self.base + "stats", json=data, headers=self.__headers()
+        ) as resp:
             await self.__handle_response(resp)
 
     def start_loop(self) -> None:

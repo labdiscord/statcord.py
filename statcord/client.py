@@ -212,7 +212,7 @@ class Client:
 
         while not self.bot.is_closed():
             self.logger.debug("Posting stats...")
-            
+
             try:
                 await self.post_data()
             except Exception as e:

@@ -61,7 +61,7 @@ class Client:
         self.loop = None
 
     def close(self):
-        pass
+        self.loop.cancel()
 
     @staticmethod
     def __headers() -> Dict[str, str]:

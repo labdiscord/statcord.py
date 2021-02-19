@@ -16,7 +16,7 @@ from statcord import exceptions
 class Client:
     """Client for using the statcord API"""
 
-    def __init__(self, bot, token, **kwargs):
+    def __init__(self, bot, token, *, mem=True, cpu=True, bandwidth=True, debug=False, custom1=None, custom2=None):
         self.logger = logging.getLogger("statcord")
         self.logging_level = kwargs.get("logging_level", logging.WARNING)
         self.logger.setLevel(self.logging_level)
@@ -32,44 +32,25 @@ class Client:
         self.base: str = "https://statcord.com/logan/"
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=bot.loop)
 
-        self.mem: Optional[bool] = None
-        if kwargs.get("mem"):
-            if isinstance(kwargs["mem"], bool):
-                self.mem = kwargs["mem"]
-            else:
-                raise TypeError(f"Memory config: expected type bool not {kwargs['mem'].__class__.__qualname__}.")
-        else:
-            self.mem = True
+        self.mem: bool = mem
+        if not isinstance(mem, bool):
+            raise TypeError(f"Memory config: expected type bool not {mem.__class__.__qualname__}.")
 
-        self.cpu: Optional[bool] = None
-        if kwargs.get("cpu"):
-            if isinstance(kwargs["cpu"], bool):
-                self.cpu = kwargs["cpu"]
-            else:
-                raise TypeError(f"CPU config: expected type bool not {kwargs['cpu'].__class__.__qualname__}")
-        else:
-            self.cpu = True
+        self.cpu: bool = cpu
+        if not isinstance(cpu, bool):
+            raise TypeError(f"CPU config: expected type bool not {cpu.__class__.__qualname__}")
 
-        self.bandwidth: Optional[bool] = None
-        if kwargs.get("bandwidth"):
-            if isinstance(kwargs["bandwidth"], bool):
-                self.bandwidth = kwargs["bandwidth"]
-            else:
-                raise TypeError("Bandwidth config: expected type bool")
-        else:
-            self.bandwidth = True
+        self.bandwidth: bool = bandwidth
+        if not isinstance(bandwidth, bool):
+            raise TypeError("Bandwidth config: expected type bool")
 
-        self.debug: Optional[bool] = None
-        if kwargs.get("debug"):
-            if isinstance(kwargs["debug"], bool):
-                self.debug = kwargs["debug"]
-            else:
-                raise TypeError(f"Debug config: expected type bool not {kwargs['debug'].__class__.__qualname__}")
-        else:
-            self.debug = False
+        self.debug: bool = debug
+        if not isinstance(debug, bool):
+            raise TypeError(f"Debug config: expected type bool not {debug.__class__.__qualname__}")
 
-        self.custom1: Optional[Coroutine] = kwargs.get("custom1") or None
-        self.custom2: Optional[Coroutine] = kwargs.get("custom2") or None
+        self.custom1: Optional[Coroutine] = custom1
+        self.custom2: Optional[Coroutine] = custom2
+
         self.active: List[int] = []
         self.commands: int = 0
         self.popular: List[Dict[str, Union[str, int]]] = []

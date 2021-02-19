@@ -42,7 +42,7 @@ class Client:
 
         self.bandwidth: bool = bandwidth
         if not isinstance(bandwidth, bool):
-            raise TypeError("Bandwidth config: expected type bool")
+            raise TypeError(f"Bandwidth config: expected type bool not {bandwidth.__class__.__qualname__}")
 
         self.debug: bool = debug
         if not isinstance(debug, bool):

@@ -16,7 +16,7 @@ from statcord import exceptions
 class Client:
     """Client for using the statcord API"""
 
-    def __init__(self, bot, token, *, mem=True, cpu=True, bandwidth=True, debug=False, custom1=None, custom2=None):
+    def __init__(self, bot, token, **kwargs):
         self.logger = logging.getLogger("statcord")
         self.logging_level = kwargs.get("logging_level", logging.WARNING)
         self.logger.setLevel(self.logging_level)
@@ -32,21 +32,21 @@ class Client:
         self.base: str = "https://statcord.com/logan/"
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=bot.loop)
 
-        self.mem: bool = mem
-        if not isinstance(mem, bool):
-            raise TypeError(f"Memory config: expected type bool not {mem.__class__.__qualname__}.")
+        self.mem: bool = kwargs.get("mem", True)
+        if not isinstance(self.mem, bool):
+            raise TypeError(f"Memory config: expected type bool not {self.mem.__class__.__qualname__}.")
 
-        self.cpu: bool = cpu
-        if not isinstance(cpu, bool):
-            raise TypeError(f"CPU config: expected type bool not {cpu.__class__.__qualname__}")
+        self.cpu: bool = kwargs.get("cpu", True)
+        if not isinstance(self.cpu, bool):
+            raise TypeError(f"CPU config: expected type bool not {self.cpu.__class__.__qualname__}")
 
-        self.bandwidth: bool = bandwidth
-        if not isinstance(bandwidth, bool):
-            raise TypeError(f"Bandwidth config: expected type bool not {bandwidth.__class__.__qualname__}")
+        self.bandwidth: bool = kwargs.get("bandwidth", True)
+        if not isinstance(self.bandwidth, bool):
+            raise TypeError(f"Bandwidth config: expected type bool not {self.bandwidth.__class__.__qualname__}")
 
-        self.debug: bool = debug
-        if not isinstance(debug, bool):
-            raise TypeError(f"Debug config: expected type bool not {debug.__class__.__qualname__}")
+        self.debug: bool = kwargs.get("debug", False)
+        if not isinstance(self.debug, bool):
+            raise TypeError(f"Debug config: expected type bool not {self.debug.__class__.__qualname__}")
 
         self.custom1: Optional[Coroutine] = custom1
         self.custom2: Optional[Coroutine] = custom2

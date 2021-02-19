@@ -78,7 +78,7 @@ class Client:
 
     @staticmethod
     def __headers() -> Dict[str, str]:
-        return {'Content-Type': 'application/json'}
+        return {"Content-Type": "application/json"}
 
     # noinspection SpellCheckingInspection
     async def __handle_response(self, res: aiohttp.ClientResponse) -> dict:

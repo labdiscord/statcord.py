@@ -3,11 +3,11 @@ from setuptools import setup
 from statcord import __title__, __author__, __version__
 
 if not __title__:
-    raise RuntimeError('title is not set')
+    raise RuntimeError("title is not set")
 if not __author__:
-    raise RuntimeError('author is not set')
+    raise RuntimeError("author is not set")
 if not __version__:
-    raise RuntimeError('version is not set')
+    raise RuntimeError("version is not set")
 
 with open("requirements.txt", "r") as f:
     requirements = f.readlines()
@@ -20,7 +20,7 @@ setup(
     author=__author__,
     url="https://github.com/labdiscord/statcord.py/",
     version=__version__,
-    packages=['statcord'],
+    packages=["statcord"],
     python_requires=">= 3.5",
     include_package_data=True,
     install_requires=requirements,

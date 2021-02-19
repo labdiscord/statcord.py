@@ -58,6 +58,11 @@ class Client:
 
         self.logger.debug("Statcord debug mode enabled")
 
+        self.loop = None
+
+    def close(self):
+        pass
+
     @staticmethod
     def __headers() -> Dict[str, str]:
         return {"Content-Type": "application/json"}
@@ -164,7 +169,7 @@ class Client:
             await self.__handle_response(resp)
 
     def start_loop(self) -> None:
-        self.bot.loop.create_task(self.__loop())
+        self.loop = self.bot.loop.create_task(self.__loop())
 
     def command_run(self, ctx: Context) -> None:
         self.commands += 1

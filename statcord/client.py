@@ -1,12 +1,12 @@
 # coding=utf-8
-import asyncio
 import contextlib
 import aiohttp
-import psutil
+import asyncio
 import logging
+import psutil
 
-from discord import Client as DiscordClient
 from typing import Optional, Coroutine, Union, List, Dict, Iterable
+from discord import Client as DiscordClient
 from discord.ext.commands import Context
 
 # this could be relative, but apparently Python doesn't like it

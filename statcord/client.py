@@ -23,6 +23,7 @@ class Client:
 
         if not isinstance(bot, DiscordClient):
             raise TypeError(f"Expected class deriving from discord.Client for arg bot not {bot.__class__.__qualname__}")
+
         if not isinstance(token, str):
             raise TypeError(f"Expected str for arg token not {token.__class__.__qualname__}")
 
@@ -86,8 +87,11 @@ class Client:
             msg = await res.json() or {}
         except aiohttp.ContentTypeError:
             msg = await res.text()
+
         self.logger.debug(f"Handling response ({res!r}): {msg!s}")
+
         status = res.status
+
         if status == 200:
             self.logger.debug(f"Code 200 OK")
             return msg
@@ -114,6 +118,7 @@ class Client:
 
     async def post_data(self) -> None:
         self.logger.debug("Got request to post data.")
+
         bot_id = str(self.bot.user.id)
         commands = str(self.commands)
 
@@ -167,7 +172,9 @@ class Client:
             "custom1": custom1,
             "custom2": custom2,
         }
+
         self.logger.debug(f"Posting stats: {data!s}")
+
         self.active = []
         self.commands = 0
         self.popular = []
@@ -180,11 +187,14 @@ class Client:
 
     def command_run(self, ctx: Context) -> None:
         self.commands += 1
+
         if ctx.author.id not in self.active:
             self.active.append(ctx.author.id)
 
         command = ctx.command.name
+
         self.logger.debug(f"Command {command} has been run by {ctx.author.id}")
+
         for cmd in filter(lambda x: x["name"] == command, self.popular):
             cmd["count"] = str(int(cmd["count"]) + 1)
             break
@@ -196,10 +206,13 @@ class Client:
         The internal loop used for automatically posting server/guild count stats
         """
         await self.bot.wait_until_ready()
+
         if self.debug:
             self.logger.debug("Statcord Auto Post has started!")
+
         while not self.bot.is_closed():
             self.logger.debug("Posting stats...")
+            
             try:
                 await self.post_data()
             except Exception as e:
@@ -207,6 +220,7 @@ class Client:
                 await self.on_error(e)
             else:
                 self.logger.debug("Posted stats successfully.")
+
             await asyncio.sleep(60)
 
     async def on_error(self, error: BaseException) -> None:

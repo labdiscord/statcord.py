@@ -63,6 +63,9 @@ class Client:
     def close(self):
         self.loop.cancel()
 
+    def __del__(self):
+        self.close()
+
     @staticmethod
     def __headers() -> Dict[str, str]:
         return {"Content-Type": "application/json"}

@@ -6,7 +6,7 @@ import psutil
 import logging
 
 from discord import Client as DiscordClient
-from typing import Optional, Coroutine, Union, List, Dict, Iterable
+from typing import Any, Optional, Coroutine, Union, List, Dict, Iterable
 from discord.ext.commands import Context
 
 # this could be relative, but apparently Python doesn't like it
@@ -80,6 +80,9 @@ class Client:
     def __headers() -> Dict[str, str]:
         return {'Content-Type': 'application/json'}
 
+    def _trace() -> Dict[str,Any]:
+        return {}
+
     # noinspection SpellCheckingInspection
     async def __handle_response(self, res: aiohttp.ClientResponse) -> dict:
         try:
@@ -89,10 +92,9 @@ class Client:
         self.logger.debug(f"Handling response ({res!r}): {msg!s}")
         status = res.status
         if status == 200:
-            self.logger.debug(f"Code 200 OK")
+            self.logger.debug("Code 200 OK")
             return msg
         elif status == 429:
-            self.logger.debug(f"Code 429 Too Many Requests: ratelimited for {msg.get('timeleft')}")
             raise exceptions.TooManyRequests(status, msg, int(msg.get("timeleft")))
         else:
             self.logger.debug(f"Code {status}")
@@ -167,6 +169,9 @@ class Client:
             "custom1": custom1,
             "custom2": custom2,
         }
+
+        data.update(self._trace())
+
         self.logger.debug(f"Posting stats: {data!s}")
         self.active = []
         self.commands = 0
@@ -203,6 +208,10 @@ class Client:
             try:
                 await self.post_data()
             except Exception as e:
+                if isinstance(e,exceptions.TooManyRequests):
+                    self.logger.debug(f"We have been ratelimited, waiting {e.wait} before retrying")
+                    await asyncio.sleep(e.wait)
+                    continue
                 self.logger.debug("Got error, dispatching error handlers.")
                 await self.on_error(e)
             else:

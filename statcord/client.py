@@ -80,7 +80,7 @@ class Client:
     def __headers() -> Dict[str, str]:
         return {'Content-Type': 'application/json'}
 
-    def _trace() -> Dict[str,Any]:
+    def _trace(self) -> Dict[str,Any]:
         return {}
 
     # noinspection SpellCheckingInspection

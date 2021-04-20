@@ -183,9 +183,9 @@ class Client:
 
     @property
     def is_loop_running(self) -> bool:
-        if not self._task:
-            return False  # Task hasn't been created.
-        return not self._task.cancelled()
+        if self._task:
+            return not self._task.cancelled()
+        return False  # Task hasn't been created.
 
     @is_loop_running.setter
     def is_loop_running(self, value) -> bool:

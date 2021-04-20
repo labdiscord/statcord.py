@@ -186,7 +186,7 @@ class Client:
         return not self._task.cancelled
 
     @is_loop_running.setter
-    def is_loop_running(self) -> bool:
+    def is_loop_running(self, value) -> bool:
         raise RuntimeError("Not allowed to edit this property.")
 
     def stop_loop(self) -> bool:

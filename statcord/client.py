@@ -73,6 +73,7 @@ class Client:
         self.commands: int = 0
         self.popular: List[Dict[str, Union[str, int]]] = []
         self.previous_bandwidth: int = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
+        self._task: Optional[asyncio.Task] = None
 
         self.logger.debug("Statcord debug mode enabled")
 
@@ -176,7 +177,21 @@ class Client:
             await self.__handle_response(resp)
 
     def start_loop(self) -> None:
-        self.bot.loop.create_task(self.__loop())
+        self._task = self.bot.loop.create_task(self.__loop())
+
+    @property
+    def is_loop_running(self) -> bool:
+        if not self._task:
+            return False  # Task hasn't been created.
+        return not self._task.cancelled
+
+    @property.setter
+    def is_loop_running(self) -> bool:
+        raise RuntimeError("Not allowed to edit this property.")
+
+    def stop_loop(self) -> bool:
+        if self._task:
+            return self._task.cancel()
 
     def command_run(self, ctx: Context) -> None:
         self.commands += 1
@@ -191,23 +206,23 @@ class Client:
         else:
             self.popular.append({"name": command, "count": "1"})
 
-    async def __loop(self) -> None:
-        """
-        The internal loop used for automatically posting server/guild count stats
-        """
-        await self.bot.wait_until_ready()
-        if self.debug:
-            self.logger.debug("Statcord Auto Post has started!")
-        while not self.bot.is_closed():
-            self.logger.debug("Posting stats...")
-            try:
-                await self.post_data()
-            except Exception as e:
-                self.logger.debug("Got error, dispatching error handlers.")
-                await self.on_error(e)
-            else:
-                self.logger.debug("Posted stats successfully.")
-            await asyncio.sleep(60)
+async def __loop(self) -> None:
+    """
+    The internal loop used for automatically posting server/guild count stats
+    """
+    await self.bot.wait_until_ready()
+    if self.debug:
+        self.logger.debug("Statcord Auto Post has started!")
+    while not self.bot.is_closed():
+        self.logger.debug("Posting stats...")
+        try:
+            await self.post_data()
+        except Exception as e:
+            self.logger.debug("Got error, dispatching error handlers.")
+            await self.on_error(e)
+        else:
+            self.logger.debug("Posted stats successfully.")
+        await asyncio.sleep(60)
 
     async def on_error(self, error: BaseException) -> None:
         self.logger.exception("Statcord posting exception occurred.", exc_info=error)

@@ -177,6 +177,8 @@ class Client:
             await self.__handle_response(resp)
 
     def start_loop(self) -> None:
+        if self._task:
+            raise RuntimeError("A loop is already running.")
         self._task = self.bot.loop.create_task(self.__loop())
 
     @property

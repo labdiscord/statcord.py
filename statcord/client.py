@@ -206,23 +206,23 @@ class Client:
         else:
             self.popular.append({"name": command, "count": "1"})
 
-async def __loop(self) -> None:
-    """
-    The internal loop used for automatically posting server/guild count stats
-    """
-    await self.bot.wait_until_ready()
-    if self.debug:
-        self.logger.debug("Statcord Auto Post has started!")
-    while not self.bot.is_closed():
-        self.logger.debug("Posting stats...")
-        try:
-            await self.post_data()
-        except Exception as e:
-            self.logger.debug("Got error, dispatching error handlers.")
-            await self.on_error(e)
-        else:
-            self.logger.debug("Posted stats successfully.")
-        await asyncio.sleep(60)
+    async def __loop(self) -> None:
+        """
+        The internal loop used for automatically posting server/guild count stats
+        """
+        await self.bot.wait_until_ready()
+        if self.debug:
+            self.logger.debug("Statcord Auto Post has started!")
+        while not self.bot.is_closed():
+            self.logger.debug("Posting stats...")
+            try:
+                await self.post_data()
+            except Exception as e:
+                self.logger.debug("Got error, dispatching error handlers.")
+                await self.on_error(e)
+            else:
+                self.logger.debug("Posted stats successfully.")
+            await asyncio.sleep(60)
 
-    async def on_error(self, error: BaseException) -> None:
-        self.logger.exception("Statcord posting exception occurred.", exc_info=error)
+        async def on_error(self, error: BaseException) -> None:
+            self.logger.exception("Statcord posting exception occurred.", exc_info=error)

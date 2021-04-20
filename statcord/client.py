@@ -185,7 +185,7 @@ class Client:
             return False  # Task hasn't been created.
         return not self._task.cancelled
 
-    @property.setter
+    @is_loop_running.setter
     def is_loop_running(self) -> bool:
         raise RuntimeError("Not allowed to edit this property.")
 

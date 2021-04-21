@@ -226,5 +226,5 @@ class Client:
                 self.logger.debug("Posted stats successfully.")
             await asyncio.sleep(60)
 
-        async def on_error(self, error: BaseException) -> None:
-            self.logger.exception("Statcord posting exception occurred.", exc_info=error)
+    async def on_error(self, error: BaseException) -> None:
+        self.logger.exception("Statcord posting exception occurred.", exc_info=error)

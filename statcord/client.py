@@ -195,6 +195,9 @@ class Client:
         if self._task:
             return self._task.cancel()
 
+    def __del__(self):
+        self.stop_loop()
+
     def command_run(self, ctx: Context) -> None:
         self.commands += 1
         if ctx.author.id not in self.active:

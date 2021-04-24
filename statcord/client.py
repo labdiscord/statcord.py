@@ -89,13 +89,13 @@ class Client:
             msg = await res.json() or {}
         except aiohttp.ContentTypeError:
             msg = await res.text()
-        self.logger.debug(f"Handling response ({res!r}): {msg!s}")
+        self.logger.debug(f"Handling response: {msg!s}")
         status = res.status
         if status == 200:
             self.logger.debug("Code 200 OK")
             return msg
         elif status == 429:
-            raise exceptions.TooManyRequests(status, msg, int(msg.get("timeleft")))
+            raise exceptions.TooManyRequests(status, msg, int(msg.get("timeleft") or '600'))
         else:
             self.logger.debug(f"Code {status}")
             raise exceptions.RequestFailure(status=status, response=msg)
@@ -115,7 +115,6 @@ class Client:
         return str(sum(self._user_counter))
 
     async def post_data(self) -> None:
-        self.logger.debug("Got request to post data.")
         bot_id = str(self.bot.user.id)
         commands = str(self.commands)
 
@@ -205,12 +204,16 @@ class Client:
             self.logger.debug("Statcord Auto Post has started!")
         while not self.bot.is_closed():
             self.logger.debug("Posting stats...")
-            try:
-                await self.post_data()
+            try:                
+            	await self.post_data()
             except Exception as e:
                 if isinstance(e,exceptions.TooManyRequests):
-                    self.logger.debug(f"We have been ratelimited, waiting {e.wait} before retrying")
+                    self.logger.debug(f"Code 429 Ratelimited. Waiting {e.wait} seconds before retrying.")
                     await asyncio.sleep(e.wait)
+                    continue
+                if isinstance(e,exceptions.RequestFailure):
+                    self.logger.debug(f"Server error. Waiting 10 minutes before retrying.")
+                    await asyncio.sleep(600)
                     continue
                 self.logger.debug("Got error, dispatching error handlers.")
                 await self.on_error(e)

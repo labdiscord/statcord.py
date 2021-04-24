@@ -204,15 +204,15 @@ class Client:
             self.logger.debug("Statcord Auto Post has started!")
         while not self.bot.is_closed():
             self.logger.debug("Posting stats...")
-            try:                
-            	await self.post_data()
+            try:
+                await self.post_data()
             except Exception as e:
                 if isinstance(e,exceptions.TooManyRequests):
                     self.logger.debug(f"Code 429 Ratelimited. Waiting {e.wait} seconds before retrying.")
                     await asyncio.sleep(e.wait)
                     continue
                 if isinstance(e,exceptions.RequestFailure):
-                    self.logger.debug(f"Server error. Waiting 10 minutes before retrying.")
+                    self.logger.debug("Server error. Waiting 10 minutes before retrying.")
                     await asyncio.sleep(600)
                     continue
                 self.logger.debug("Got error, dispatching error handlers.")

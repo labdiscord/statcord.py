@@ -212,7 +212,7 @@ class Client:
                     await asyncio.sleep(e.wait)
                     continue
                 if isinstance(e,exceptions.RequestFailure):
-                    self.logger.debug("Server error. Waiting 10 minutes before retrying.")
+                    self.logger.debug(f"HTTP {e.status} Server Error. Waiting 10 minutes before retrying.")
                     await asyncio.sleep(600)
                     continue
                 self.logger.debug("Got error, dispatching error handlers.")

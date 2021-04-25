@@ -6,7 +6,7 @@ import psutil
 import logging
 
 from discord import Client as DiscordClient
-from typing import Optional, Coroutine, Union, List, Dict, Iterable
+from typing import Any, Optional, Coroutine, Union, List, Dict, Iterable
 from discord.ext.commands import Context
 
 # this could be relative, but apparently Python doesn't like it
@@ -28,7 +28,7 @@ class Client:
 
         self.bot: DiscordClient = bot
         self.key: str = token
-        self.base: str = "https://statcord.com/logan/"
+        self.base: str = "https://api.statcord.com/v3/"
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=bot.loop)
 
         self.mem: Optional[bool] = None
@@ -80,20 +80,22 @@ class Client:
     def __headers() -> Dict[str, str]:
         return {'Content-Type': 'application/json'}
 
+    def _trace(self) -> Dict[str,Any]:
+        return {}
+
     # noinspection SpellCheckingInspection
     async def __handle_response(self, res: aiohttp.ClientResponse) -> dict:
         try:
             msg = await res.json() or {}
         except aiohttp.ContentTypeError:
             msg = await res.text()
-        self.logger.debug(f"Handling response ({res!r}): {msg!s}")
+        self.logger.debug(f"Handling response: {msg!s}")
         status = res.status
         if status == 200:
-            self.logger.debug(f"Code 200 OK")
+            self.logger.debug("Code 200 OK")
             return msg
         elif status == 429:
-            self.logger.debug(f"Code 429 Too Many Requests: ratelimited for {msg.get('timeleft')}")
-            raise exceptions.TooManyRequests(status, msg, int(msg.get("timeleft")))
+            raise exceptions.TooManyRequests(status, msg, int(msg.get("timeleft") or '600'))
         else:
             self.logger.debug(f"Code {status}")
             raise exceptions.RequestFailure(status=status, response=msg)
@@ -113,7 +115,6 @@ class Client:
         return str(sum(self._user_counter))
 
     async def post_data(self) -> None:
-        self.logger.debug("Got request to post data.")
         bot_id = str(self.bot.user.id)
         commands = str(self.commands)
 
@@ -167,6 +168,9 @@ class Client:
             "custom1": custom1,
             "custom2": custom2,
         }
+
+        data.update(self._trace())
+
         self.logger.debug(f"Posting stats: {data!s}")
         self.active = []
         self.commands = 0
@@ -203,6 +207,14 @@ class Client:
             try:
                 await self.post_data()
             except Exception as e:
+                if isinstance(e,exceptions.TooManyRequests):
+                    self.logger.debug(f"Code 429 Ratelimited. Waiting {e.wait} seconds before retrying.")
+                    await asyncio.sleep(e.wait)
+                    continue
+                if isinstance(e,exceptions.RequestFailure):
+                    self.logger.debug(f"HTTP {e.status} Server Error. Waiting 10 minutes before retrying.")
+                    await asyncio.sleep(600)
+                    continue
                 self.logger.debug("Got error, dispatching error handlers.")
                 await self.on_error(e)
             else:

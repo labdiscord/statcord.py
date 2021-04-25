@@ -6,6 +6,8 @@ class StatcordException(Exception):
 
 class RequestFailure(StatcordException):
     def __init__(self, status: int, response: str):
+        self.status = status
+        self.response = response
         super().__init__("{}: {}".format(status, response))
 
 

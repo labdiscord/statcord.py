@@ -177,7 +177,7 @@ class Client:
             await self.__handle_response(resp)
 
     def start_loop(self) -> None:
-        if self._task:
+        if self._task and (not self._task.cancelled()):
             raise RuntimeError("A loop is already running.")
         self._task = self.bot.loop.create_task(self.__loop())
 
@@ -192,7 +192,7 @@ class Client:
         raise RuntimeError("Not allowed to edit this property.")
 
     def stop_loop(self) -> bool:
-        if self._task:
+        if self._task and (not self._task.cancelled()):
             return self._task.cancel()
 
     def __del__(self):

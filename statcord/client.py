@@ -6,7 +6,7 @@ import psutil
 import logging
 
 from discord import Client as DiscordClient
-from typing import Any, Optional, Coroutine, Union, List, Dict, Iterable
+from typing import Any, Optional, Union, List, Dict, Iterable, Callable, Awaitable
 from discord.ext.commands import Context
 
 # this could be relative, but apparently Python doesn't like it
@@ -67,8 +67,8 @@ class Client:
         else:
             self.debug = False
 
-        self.custom1: Optional[Coroutine] = kwargs.get("custom1") or None
-        self.custom2: Optional[Coroutine] = kwargs.get("custom2") or None
+        self.custom1: Optional[Callable[[], Awaitable[str]]] = kwargs.get("custom1") or None
+        self.custom2: Optional[Callable[[], Awaitable[str]]] = kwargs.get("custom2") or None
         self.active: List[int] = []
         self.commands: int = 0
         self.popular: List[Dict[str, Union[str, int]]] = []

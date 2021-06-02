@@ -194,7 +194,21 @@ class Client:
             break
         else:
             self.popular.append({"name": command, "count": "1"})
+                                
+    def slash_command_run(self, ctx: Context) -> None:
+        self.commands += 1
+        if ctx.author.id not in self.active:
+            self.active.append(ctx.author.id)
 
+        command = ctx.name
+        self.logger.debug(f"Command {command} has been run by {ctx.author.id}")
+        for cmd in filter(lambda x: x["name"] == command, self.popular):
+            cmd["count"] = str(int(cmd["count"]) + 1)
+            break
+        else:
+            self.popular.append({"name": command, "count": "1"})                         
+
+                                
     async def __loop(self) -> None:
         """
         The internal loop used for automatically posting server/guild count stats

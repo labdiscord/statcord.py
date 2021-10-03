@@ -67,8 +67,8 @@ class Client:
         else:
             self.debug = False
 
-        self.custom1: Optional[Coroutine] = kwargs.get("custom1") or None
-        self.custom2: Optional[Coroutine] = kwargs.get("custom2") or None
+        self.custom1: Optional[Callable[[], Awaitable[str]]] = kwargs.get("custom1") or None
+        self.custom2: Optional[Callable[[], Awaitable[str]]] = kwargs.get("custom2") or None
         self.active: List[int] = []
         self.commands: int = 0
         self.popular: List[Dict[str, Union[str, int]]] = []

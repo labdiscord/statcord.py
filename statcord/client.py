@@ -6,7 +6,7 @@ import psutil
 import logging
 
 from discord import Client as DiscordClient
-from typing import Any, Optional, Union, List, Dict, Iterable, Callable, Awaitable
+from typing import Any, Optional, Coroutine, Union, List, Dict, Iterable
 from discord.ext.commands import Context
 
 # this could be relative, but apparently Python doesn't like it
@@ -28,7 +28,7 @@ class Client:
 
         self.bot: DiscordClient = bot
         self.key: str = token
-        self.base: str = "https://api.statcord.com/v3/"
+        self.base: str = "https://api.statcord.com/beta/"
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=bot.loop)
 
         self.mem: Optional[bool] = None

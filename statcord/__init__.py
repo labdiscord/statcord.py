@@ -1,8 +1,8 @@
 __title__ = 'statcord.py'
 __author__ = 'statcord.com'
 __license__ = 'MIT'
-__copyright__ = 'Copyright 2020, statcord.com'
-__version__ = '3.1.0'
+__copyright__ = 'Copyright 2022, statcord.com'
+__version__ = '3.1.1'
 
 name = "statcord"
 

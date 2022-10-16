@@ -2,11 +2,11 @@
 
 <!-- Title -->
 <h1 align="center" id="statcordpy">
-    statcord.py
+    statcord.py-beta
 </h1>
 
 <!-- Tag line --> 
-<h3 align="center">A simple API wrapper for statcord.com  to connect your bot and get your bot stats.</h3>
+<h3 align="center">A simple API wrapper for statcord.com  to connect your bot and get your bot stats. [BETA]</h3>
 
 
 
